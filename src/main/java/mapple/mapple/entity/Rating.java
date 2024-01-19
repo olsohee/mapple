@@ -1,0 +1,11 @@
+package mapple.mapple.entity;
+
+public enum Rating {
+
+    ONE,
+    TWO,
+    THREE,
+    FOUR,
+    FIVE
+    ;
+}
