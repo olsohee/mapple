@@ -13,7 +13,9 @@ import java.util.Arrays;
 @Getter
 public enum ErrorCode {
 
-    DUPLICATED_EMAIL(HttpStatus.BAD_REQUEST, "user.duplicated.email")
+    DUPLICATED_EMAIL(HttpStatus.BAD_REQUEST, "user.duplicated.email"),
+    NOT_FOUND_PUBLIC_STATUS(HttpStatus.BAD_REQUEST, "review.not_found.public_status"),
+    NOT_FOUND_RATING(HttpStatus.BAD_REQUEST, "review.not_found.rating")
     ;
 
     private final HttpStatus httpStatus;

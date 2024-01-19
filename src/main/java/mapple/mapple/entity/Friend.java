@@ -13,6 +13,7 @@ public class Friend {
     private long id;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private RequestStatus requestStatus;
 
     @ManyToOne
