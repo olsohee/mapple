@@ -1,10 +1,11 @@
-package mapple.mapple.entity;
+package mapple.mapple.user.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import mapple.mapple.entity.BaseEntity;
 
 @Entity
 @Getter

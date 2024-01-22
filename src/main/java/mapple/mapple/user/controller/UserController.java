@@ -1,8 +1,10 @@
 package mapple.mapple.user.controller;
 
 import lombok.RequiredArgsConstructor;
+import mapple.mapple.jwt.JwtDto;
 import mapple.mapple.user.dto.JoinRequest;
 import mapple.mapple.user.dto.JoinResponse;
+import mapple.mapple.user.dto.LoginRequest;
 import mapple.mapple.user.service.UserService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,5 +20,10 @@ public class UserController {
     @PostMapping("/join")
     public JoinResponse join(@Validated @RequestBody JoinRequest dto) {
         return userService.join(dto);
+    }
+
+    @PostMapping("/login")
+    public JwtDto login(@Validated @RequestBody LoginRequest dto) {
+        return userService.login(dto);
     }
 }

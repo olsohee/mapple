@@ -28,4 +28,12 @@ public class ExceptionController {
         String message = messageSource.getMessage(fieldError.getCode(), new Object[]{fieldError.getField()}, null, null);
         return new ErrorResponse(HttpStatus.BAD_REQUEST, message);
     }
+
+    @ExceptionHandler
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleJwtException(CustomJwtException e) { {
+        return new ErrorResponse(e.getErrorCode().getHttpStatus(), e.getErrorCode().getMessage());
+    }
+
+    }
 }
