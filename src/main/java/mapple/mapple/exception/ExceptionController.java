@@ -31,9 +31,7 @@ public class ExceptionController {
 
     @ExceptionHandler
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleJwtException(CustomJwtException e) { {
+    public ErrorResponse handleJwtException(CustomJwtException e) {
         return new ErrorResponse(e.getErrorCode().getHttpStatus(), e.getErrorCode().getMessage());
-    }
-
     }
 }
