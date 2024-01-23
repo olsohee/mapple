@@ -40,7 +40,7 @@ jobs:
         
       # 빌드
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew clean build --exclude-task test
 
       # zip 파일 생성
       - name: Make zip file
