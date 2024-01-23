@@ -2,11 +2,9 @@ package mapple.mapple.review.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import mapple.mapple.entity.BaseEntity;
-import mapple.mapple.entity.Image;
 import mapple.mapple.entity.PublicStatus;
 import mapple.mapple.entity.Rating;
 import mapple.mapple.user.entity.User;
@@ -16,7 +14,6 @@ import java.util.List;
 
 @Entity
 @Getter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Review extends BaseEntity {
@@ -47,6 +44,19 @@ public class Review extends BaseEntity {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     List<Image> images = new ArrayList<>();
+
+    public static Review create(String placeName, String content, String url,
+                                PublicStatus publicStatus, Rating rating, User user) {
+        Review review = new Review();
+        review.placeName = placeName;
+        review.content = content;
+        review.url = url;
+        review.publicStatus = publicStatus;
+        review.rating = rating;
+        review.user = user;
+        review.images = new ArrayList<>();
+        return review;
+    }
 
     // 연관관계 편의 메소드
     public void addImage(Image image) {

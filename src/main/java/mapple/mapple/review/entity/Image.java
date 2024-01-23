@@ -1,9 +1,7 @@
-package mapple.mapple.entity;
+package mapple.mapple.review.entity;
 
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Getter;
-import mapple.mapple.review.entity.Review;
 
 @Entity
 @Getter

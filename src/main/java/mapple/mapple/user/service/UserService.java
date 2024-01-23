@@ -23,13 +23,8 @@ public class UserService {
 
     public JoinResponse join(JoinRequest dto) {
         validateDuplication(dto.getEmail());
-        User user = User.builder().email(dto.getEmail())
-                .password(dto.getPassword())
-                .username(dto.getUsername())
-                .phoneNumber(dto.getPhoneNumber())
-                .build();
+        User user = User.create(dto.getEmail(), dto.getPassword(), dto.getUsername(), dto.getPhoneNumber());
         userRepository.save(user);
-
         return new JoinResponse(user.getEmail(), user.getCreatedAt());
     }
 

@@ -1,7 +1,7 @@
 package mapple.mapple.review.service;
 
 import lombok.RequiredArgsConstructor;
-import mapple.mapple.entity.Image;
+import mapple.mapple.review.entity.Image;
 import mapple.mapple.entity.PublicStatus;
 import mapple.mapple.entity.Rating;
 import mapple.mapple.exception.ErrorCode;
@@ -19,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,15 +37,8 @@ public class ReviewService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserException(ErrorCode.NOT_FOUND_EMAIL));
 
-        Review review = Review.builder().placeName(dto.getPlaceName())
-                .content(dto.getContent())
-                .url(dto.getUrl())
-                .publicStatus(PublicStatus.find(dto.getPublicStatus()))
-                .rating(Rating.find(dto.getRating()))
-                .user(user)
-                .images(new ArrayList<>())
-                .build();
-
+        Review review = Review.create(dto.getPlaceName(), dto.getContent(), dto.getUrl(),
+                PublicStatus.find(dto.getPublicStatus()), Rating.find(dto.getRating()), user);
 
         for (MultipartFile file : files) {
             String updatedName = file.getOriginalFilename();

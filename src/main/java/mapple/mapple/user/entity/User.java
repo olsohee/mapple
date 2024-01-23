@@ -2,14 +2,12 @@ package mapple.mapple.user.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import mapple.mapple.entity.BaseEntity;
 
 @Entity
 @Getter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class User extends BaseEntity {
@@ -28,4 +26,13 @@ public class User extends BaseEntity {
     private String password;
 
     private String phoneNumber;
+
+    public static User create(String username, String email, String password, String phoneNumber) {
+        User user = new User();
+        user.username = username;
+        user.email = email;
+        user.password = password;
+        user.phoneNumber = phoneNumber;
+        return user;
+    }
 }
