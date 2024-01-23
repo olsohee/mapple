@@ -1,0 +1,23 @@
+spring:
+  messages:
+    basename: error_messages
+  datasource:
+    url: ${DATASOURCE_URL}
+    username: ${DATASOURCE_USERNAME}
+    password: ${DATASOURCE_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true
+logging:
+  level:
+    org:
+      hibernate.SQL: debug
+jwt:
+  secret: ${JWT_SECRET}
+file:
+  dir:
+    review_image: ${FILE_DIR_REVIEW_IMAGE}
+
