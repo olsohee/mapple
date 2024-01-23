@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import mapple.mapple.jwt.JwtDto;
 import mapple.mapple.jwt.JwtUtils;
 import mapple.mapple.user.dto.LoginRequest;
-import mapple.mapple.user.entity.CustomUserDetails;
 import mapple.mapple.user.entity.User;
 import mapple.mapple.exception.ErrorCode;
 import mapple.mapple.exception.UserException;
@@ -27,7 +26,8 @@ public class UserService {
         User user = User.builder().email(dto.getEmail())
                 .password(dto.getPassword())
                 .username(dto.getUsername())
-                .phoneNumber(dto.getPhoneNumber()).build();
+                .phoneNumber(dto.getPhoneNumber())
+                .build();
         userRepository.save(user);
 
         return new JoinResponse(user.getEmail(), user.getCreatedAt());
@@ -42,7 +42,7 @@ public class UserService {
     public JwtDto login(LoginRequest dto) {
         User user = validateEmail(dto.getEmail());
         validatePassword(user, dto.getPassword());
-        return jwtUtils.generateToken(user);
+        return jwtUtils.generateToken(user.getEmail());
     }
 
     private User validateEmail(String email) {

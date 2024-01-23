@@ -6,14 +6,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import mapple.mapple.exception.ErrorCode;
 import mapple.mapple.exception.CustomJwtException;
 import mapple.mapple.user.entity.CustomUserDetails;
-import mapple.mapple.user.entity.User;
 import mapple.mapple.user.service.UserDetailManager;
-import mapple.mapple.user.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -36,13 +33,13 @@ public class JwtUtils {
     /**
      * 최초 로그인시 JWT 토큰 생성 후 반환
      */
-    public JwtDto generateToken(User user) {
+    public JwtDto generateToken(String email) {
         Claims claims = Jwts.claims()
-                .setSubject(user.getEmail()); // jwt의 payload에 사용자 이메일 저장
-        return new JwtDto(generateAccessToken(user, claims), generateRefreshToken(user, claims));
+                .setSubject(email); // jwt의 payload에 사용자 이메일 저장
+        return new JwtDto(generateAccessToken(claims), generateRefreshToken(claims));
     }
 
-    private String generateAccessToken(User user, Claims claims) {
+    private String generateAccessToken(Claims claims) {
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(Date.from(Instant.now()))
@@ -51,7 +48,7 @@ public class JwtUtils {
                 .compact();
     }
 
-    private String generateRefreshToken(User user, Claims claims) {
+    private String generateRefreshToken(Claims claims) {
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(Date.from(Instant.now()))
@@ -73,13 +70,27 @@ public class JwtUtils {
     }
 
     /**
-     * AccessToken 유효성 검증
+     * 토큰 유효성 검증
      */
-    public boolean validateAccessToken(String token) {
-        // jjwt 라이브러리는 jwt 해석시 유효하지 않은 jwt이면 예외를 발생시킨다
+    public boolean validateToken(String accessToken) {
         try {
-            jwtParser.parseClaimsJws(token); // jwt parse
+            jwtParser.parseClaimsJws(accessToken);
             return true;
+        } catch (ExpiredJwtException e) {
+            throw new CustomJwtException(ErrorCode.EXPIRED_TOKEN);
+        } catch (JwtException e) {
+            throw new CustomJwtException(ErrorCode.INVALID_TOKEN);
+        }
+    }
+
+    /**
+     * Refresh Token 토큰 유효성 검증 후 유효하면 email 반환
+     */
+    public String validateRefreshToken(String refreshToken) {
+        try {
+            Jws<Claims> claims = jwtParser.parseClaimsJws(refreshToken);
+            String email = claims.getBody().getSubject();
+            return email;
         } catch (ExpiredJwtException e) {
             throw new CustomJwtException(ErrorCode.EXPIRED_TOKEN);
         } catch (JwtException e) {
@@ -91,7 +102,8 @@ public class JwtUtils {
         // 토큰에 저장된 이메일 정보
         String email = jwtParser.parseClaimsJws(token).getBody().getSubject();
         CustomUserDetails user = (CustomUserDetails) userDetailManager.loadUserByUsername(email);
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword());
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword(), user.getAuthorities());
         return authentication;
     }
 }

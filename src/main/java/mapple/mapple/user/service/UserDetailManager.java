@@ -1,6 +1,7 @@
 package mapple.mapple.user.service;
 
 import lombok.RequiredArgsConstructor;
+import mapple.mapple.exception.CustomJwtException;
 import mapple.mapple.exception.ErrorCode;
 import mapple.mapple.exception.UserException;
 import mapple.mapple.user.entity.CustomUserDetails;
@@ -20,7 +21,7 @@ public class UserDetailManager implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserException(ErrorCode.NOT_FOUND_EMAIL));
+                .orElseThrow(() -> new CustomJwtException(ErrorCode.INVALID_TOKEN));
         return CustomUserDetails.createFromEntity(user);
     }
 }
