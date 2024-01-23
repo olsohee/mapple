@@ -32,7 +32,7 @@ jobs:
           spring.datasource.username: ${{ secrets.DATASOURCE_USERNAME }}
           spring.datasource.password: ${{ secrets.DATASOURCE_PASSWORD }}
           jwt.secret: ${{ secrets.JWT_SECRET }}
-          file.dir.review_image: ${{FILE_DIR_REVIEW_IMAGE}}
+          file.dir.review_image: ${{ secrets.FILE_DIR_REVIEW_IMAGE }}
 
       # 빌드 권한 설정    
       - name: Grant execute permission for gradlew
