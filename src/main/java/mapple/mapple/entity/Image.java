@@ -1,6 +1,7 @@
 package mapple.mapple.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import mapple.mapple.review.entity.Review;
 
@@ -23,4 +24,17 @@ public class Image {
     @ManyToOne
     @JoinColumn(name = "review_id")
     private Review review;
+
+    public void setReview(Review review) {
+        this.review = review;
+    }
+
+    public static Image create(String storedName, String updatedName, String storeDir, Review review) {
+        Image image = new Image();
+        image.storedName = storedName;
+        image.updatedName = updatedName;
+        image.storeDir = storeDir;
+        review.addImage(image); // 연관관계 편의 메소드 사용
+        return image;
+    }
 }

@@ -6,9 +6,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import mapple.mapple.entity.BaseEntity;
+import mapple.mapple.entity.Image;
 import mapple.mapple.entity.PublicStatus;
 import mapple.mapple.entity.Rating;
 import mapple.mapple.user.entity.User;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -40,4 +44,16 @@ public class Review extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Image> images = new ArrayList<>();
+
+    // 연관관계 편의 메소드
+    public void addImage(Image image) {
+        if (image.getReview() != null) {
+            image.getReview().getImages().remove(image);
+        }
+        image.setReview(this);
+        this.images.add(image);
+    }
 }
