@@ -1,6 +1,6 @@
 package mapple.mapple.review.repository;
 
-import mapple.mapple.entity.Review;
+import mapple.mapple.review.entity.Review;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

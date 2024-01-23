@@ -1,10 +1,13 @@
-package mapple.mapple.entity;
+package mapple.mapple.review.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import mapple.mapple.entity.BaseEntity;
+import mapple.mapple.entity.PublicStatus;
+import mapple.mapple.entity.Rating;
 import mapple.mapple.user.entity.User;
 
 @Entity

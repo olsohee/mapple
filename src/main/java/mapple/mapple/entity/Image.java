@@ -2,6 +2,7 @@ package mapple.mapple.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import mapple.mapple.review.entity.Review;
 
 @Entity
 @Getter

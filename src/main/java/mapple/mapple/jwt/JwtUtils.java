@@ -30,9 +30,6 @@ public class JwtUtils {
         this.userDetailManager = userDetailManager;
     }
 
-    /**
-     * 최초 로그인시 JWT 토큰 생성 후 반환
-     */
     public JwtDto generateToken(String email) {
         Claims claims = Jwts.claims()
                 .setSubject(email); // jwt의 payload에 사용자 이메일 저장
@@ -57,9 +54,6 @@ public class JwtUtils {
                 .compact();
     }
 
-    /**
-     * 헤더에서 JWT 토큰 가져오기
-     */
     public String getTokenFromHeader(HttpServletRequest request) {
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (header != null && header.startsWith("Bearer ")) {
@@ -69,10 +63,7 @@ public class JwtUtils {
         }
     }
 
-    /**
-     * 토큰 유효성 검증
-     */
-    public boolean validateToken(String accessToken) {
+    public boolean validateAccessToken(String accessToken) {
         try {
             jwtParser.parseClaimsJws(accessToken);
             return true;
@@ -105,5 +96,9 @@ public class JwtUtils {
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword(), user.getAuthorities());
         return authentication;
+    }
+
+    public String getEmailFromToken(String token) {
+        return jwtParser.parseClaimsJws(token).getBody().getSubject();
     }
 }
