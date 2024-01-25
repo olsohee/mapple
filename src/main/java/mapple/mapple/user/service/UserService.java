@@ -26,18 +26,11 @@ public class UserService {
         validateDuplication(dto.getEmail());
         User user = User.create(dto.getUsername(), dto.getEmail(), dto.getPassword(), dto.getPhoneNumber());
         userRepository.save(user);
-        return new JoinResponse(user.getEmail(), user.getCreatedAt());
-    }
-
-    public JoinResponse joinOAuth(OAuthJoinRequest dto) {
-        //TODO 이메일 중복 검증
-        User user = User.createOAuthUser(dto.getUsername(), dto.getEmail());
-        userRepository.save(user);
-        return new JoinResponse(user.getEmail(), user.getCreatedAt());
+        return new JoinResponse(user.getIdentifier(), user.getCreatedAt());
     }
 
     private void validateDuplication(String email) {
-        if (userRepository.findByEmail(email).isPresent()) {
+        if (userRepository.findByIdentifier(email).isPresent()) {
             throw new UserException(ErrorCode.DUPLICATED_EMAIL);
         }
     }
@@ -49,7 +42,7 @@ public class UserService {
     }
 
     private User validateEmail(String email) {
-        return userRepository.findByEmail(email)
+        return userRepository.findByIdentifier(email)
                 .orElseThrow(() -> new UserException(ErrorCode.NOT_FOUND_EMAIL));
     }
 

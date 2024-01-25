@@ -34,7 +34,7 @@ public class ReviewService {
     private String reviewImageFileDir;
 
     public CreateReviewResponse createReview(CreateReviewRequest dto, List<MultipartFile> files, String email) throws IOException {
-        User user = userRepository.findByEmail(email)
+        User user = userRepository.findByIdentifier(email)
                 .orElseThrow(() -> new UserException(ErrorCode.NOT_FOUND_EMAIL));
 
         Review review = Review.create(dto.getPlaceName(), dto.getContent(), dto.getUrl(),

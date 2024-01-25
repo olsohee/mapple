@@ -26,19 +26,16 @@ public class UserController {
         return userService.join(dto);
     }
 
-    @PostMapping("/join/oauth")
-    public JwtDto joinOAuth(@Validated @RequestBody OAuthJoinRequest dto) {
-        // 회원가입
-        userService.joinOAuth(dto);
-        // 로그인
-        return jwtUtils.generateToken(dto.getEmail());
-    }
-
     @PostMapping("/login")
     public JwtDto login(@Validated @RequestBody LoginRequest dto) {
         return userService.login(dto);
     }
 
+    @GetMapping("/login/oauth")
+    public JwtDto oAuthLogin(@RequestParam("access_token") String accessToken,
+                             @RequestParam("refresh_token") String refreshToken) {
+        return new JwtDto(accessToken, refreshToken);
+    }
 
     /**
      * access token 만료시, refresh token을 통해 토큰 갱신
@@ -48,11 +45,5 @@ public class UserController {
         String refreshToken = jwtUtils.getTokenFromHeader(request);
         String email = jwtUtils.validateRefreshToken(refreshToken);
         return jwtUtils.generateToken(email);
-    }
-
-    @GetMapping("/login/oauth")
-    public JwtDto successOAuth(@RequestParam("access_token") String accessToken,
-                               @RequestParam("refresh_token") String refreshToken) {
-        return new JwtDto(accessToken, refreshToken);
     }
 }

@@ -30,9 +30,9 @@ public class JwtUtils {
         this.userDetailManager = userDetailManager;
     }
 
-    public JwtDto generateToken(String email) {
+    public JwtDto generateToken(String identifier) {
         Claims claims = Jwts.claims()
-                .setSubject(email);
+                .setSubject(identifier);
         return new JwtDto(generateAccessToken(claims), generateRefreshToken(claims));
     }
 
@@ -90,11 +90,11 @@ public class JwtUtils {
     }
 
     public Authentication generateAuthentication(String token) {
-        // 토큰에 저장된 이메일 정보
-        String email = jwtParser.parseClaimsJws(token).getBody().getSubject();
-        CustomUserDetails user = (CustomUserDetails) userDetailManager.loadUserByUsername(email);
+        // 토큰에 저장된 식별자 정보
+        String identifier = jwtParser.parseClaimsJws(token).getBody().getSubject();
+        CustomUserDetails user = (CustomUserDetails) userDetailManager.loadUserByUsername(identifier);
         UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword(), user.getAuthorities());
+                new UsernamePasswordAuthenticationToken(identifier, user.getPassword(), user.getAuthorities());
         return authentication;
     }
 

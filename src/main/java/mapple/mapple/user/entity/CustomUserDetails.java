@@ -16,7 +16,7 @@ public class CustomUserDetails extends BaseEntity implements UserDetails {
 
     private String username;
 
-    private String email;
+    private String identifier;
 
     private String password;
 
@@ -26,7 +26,7 @@ public class CustomUserDetails extends BaseEntity implements UserDetails {
         return CustomUserDetails.builder()
                 .id(user.getId())
                 .username(user.getUsername())
-                .email(user.getEmail())
+                .identifier(user.getIdentifier())
                 .password(user.getPassword())
                 .phoneNumber(user.getPhoneNumber())
                 .build();

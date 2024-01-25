@@ -19,8 +19,8 @@ public class UserDetailManager implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email)
+    public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
+        User user = userRepository.findByIdentifier(identifier)
                 .orElseThrow(() -> new CustomJwtException(ErrorCode.INVALID_TOKEN));
         return CustomUserDetails.createFromEntity(user);
     }
