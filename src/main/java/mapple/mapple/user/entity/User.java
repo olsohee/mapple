@@ -22,10 +22,13 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String email;
 
-    @Column(nullable = false)
     private String password;
 
     private String phoneNumber;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private OAuthUser oAuthUser;
 
     public static User create(String username, String email, String password, String phoneNumber) {
         User user = new User();
@@ -33,6 +36,15 @@ public class User extends BaseEntity {
         user.email = email;
         user.password = password;
         user.phoneNumber = phoneNumber;
+        user.oAuthUser = OAuthUser.FALSE;
+        return user;
+    }
+
+    public static User createOAuthUser(String username, String email) {
+        User user = new User();
+        user.username = username;
+        user.email = email;
+        user.oAuthUser = OAuthUser.TRUE;
         return user;
     }
 }

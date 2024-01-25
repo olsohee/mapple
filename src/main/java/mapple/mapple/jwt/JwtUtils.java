@@ -32,7 +32,7 @@ public class JwtUtils {
 
     public JwtDto generateToken(String email) {
         Claims claims = Jwts.claims()
-                .setSubject(email); // jwt의 payload에 사용자 이메일 저장
+                .setSubject(email);
         return new JwtDto(generateAccessToken(claims), generateRefreshToken(claims));
     }
 
