@@ -10,7 +10,8 @@ import java.util.Arrays;
 public enum OAuthProvider {
 
     NONE(""),
-    KAKAO("kakao");
+    KAKAO("kakao"),
+    NAVER("naver");
 
     private String name;
 
