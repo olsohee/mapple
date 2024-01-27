@@ -5,12 +5,10 @@ import lombok.RequiredArgsConstructor;
 import mapple.mapple.jwt.JwtUtils;
 import mapple.mapple.review.dto.CreateReviewRequest;
 import mapple.mapple.review.dto.CreateReviewResponse;
+import mapple.mapple.review.dto.ReadReviewListResponse;
 import mapple.mapple.review.service.ReviewService;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -30,5 +28,10 @@ public class ReviewController {
         String token = jwtUtils.getTokenFromHeader(request);
         String email = jwtUtils.getEmailFromToken(token);
         return reviewService.createReview(dto, files, email);
+    }
+
+    @GetMapping("/reviews")
+    public List<ReadReviewListResponse> readAll() {
+        return reviewService.readAll();
     }
 }

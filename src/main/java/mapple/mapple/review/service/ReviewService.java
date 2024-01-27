@@ -1,6 +1,7 @@
 package mapple.mapple.review.service;
 
 import lombok.RequiredArgsConstructor;
+import mapple.mapple.review.dto.ReadReviewListResponse;
 import mapple.mapple.review.entity.Image;
 import mapple.mapple.entity.PublicStatus;
 import mapple.mapple.entity.Rating;
@@ -57,5 +58,13 @@ public class ReviewService {
         int pos = updatedName.lastIndexOf(".");
         String ext = updatedName.substring(pos + 1);
         return UUID.randomUUID() + "." + ext;
+    }
+
+    public List<ReadReviewListResponse> readAll() {
+        List<Review> reviews = reviewRepository.findAll();
+        return reviews.stream()
+                .map(review -> new ReadReviewListResponse(review.getUser().getUsername(), review.getPlaceName(),
+                        review.getRating(), review.getUpdatedAt(), review.getCreatedAt()))
+                .toList();
     }
 }
