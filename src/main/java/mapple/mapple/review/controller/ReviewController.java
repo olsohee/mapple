@@ -26,7 +26,7 @@ public class ReviewController {
                                              @RequestPart(required = false) List<MultipartFile> files,
                                              HttpServletRequest request) throws IOException {
         String token = jwtUtils.getTokenFromHeader(request);
-        String email = jwtUtils.getEmailFromToken(token);
+        String email = jwtUtils.getIdentifierFromToken(token);
         return reviewService.createReview(dto, files, email);
     }
 

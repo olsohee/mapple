@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -62,6 +63,16 @@ public class ReviewService {
 
     public List<ReadReviewListResponse> readAll() {
         List<Review> reviews = reviewRepository.findAll();
+        return reviews.stream()
+                .map(review -> new ReadReviewListResponse(review.getUser().getUsername(), review.getPlaceName(),
+                        review.getRating(), review.getUpdatedAt(), review.getCreatedAt()))
+                .toList();
+    }
+
+    public List<ReadReviewListResponse> readAllByUserIdentifier(String identifier) {
+        User user = userRepository.findByIdentifier(identifier)
+                .orElseThrow(() -> new UserException(ErrorCode.NOT_FOUND_EMAIL));
+        List<Review> reviews = reviewRepository.findByUserId(user.getId());
         return reviews.stream()
                 .map(review -> new ReadReviewListResponse(review.getUser().getUsername(), review.getPlaceName(),
                         review.getRating(), review.getUpdatedAt(), review.getCreatedAt()))

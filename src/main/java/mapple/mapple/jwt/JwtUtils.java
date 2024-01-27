@@ -98,7 +98,7 @@ public class JwtUtils {
         return authentication;
     }
 
-    public String getEmailFromToken(String token) {
+    public String getIdentifierFromToken(String token) {
         return jwtParser.parseClaimsJws(token).getBody().getSubject();
     }
 }
