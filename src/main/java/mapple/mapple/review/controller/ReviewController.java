@@ -6,6 +6,7 @@ import mapple.mapple.jwt.JwtUtils;
 import mapple.mapple.review.dto.CreateAndUpdateReviewRequest;
 import mapple.mapple.review.dto.CreateAndUpdateReviewResponse;
 import mapple.mapple.review.dto.ReadReviewListResponse;
+import mapple.mapple.review.dto.ReadReviewResponse;
 import mapple.mapple.review.service.ReviewService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +22,16 @@ public class ReviewController {
     private final ReviewService reviewService;
     private final JwtUtils jwtUtils;
 
+    @GetMapping("/reviews")
+    public List<ReadReviewListResponse> readAll() {
+        return reviewService.readAll();
+    }
+
+    @GetMapping("/review/{reviewId}")
+    public ReadReviewResponse read(@PathVariable("reviewId") long reviewId) {
+        return reviewService.read(reviewId);
+    }
+
     @PostMapping("/review")
     public CreateAndUpdateReviewResponse createReview(@Validated @RequestPart CreateAndUpdateReviewRequest dto,
                                                       @RequestPart(required = false) List<MultipartFile> files,
@@ -28,11 +39,6 @@ public class ReviewController {
         String token = jwtUtils.getTokenFromHeader(request);
         String identifier = jwtUtils.getIdentifierFromToken(token);
         return reviewService.createReview(dto, files, identifier);
-    }
-
-    @GetMapping("/reviews")
-    public List<ReadReviewListResponse> readAll() {
-        return reviewService.readAll();
     }
 
     @PutMapping("/review/{reviewId}")

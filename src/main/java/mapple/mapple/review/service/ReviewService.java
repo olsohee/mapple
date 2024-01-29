@@ -3,6 +3,7 @@ package mapple.mapple.review.service;
 import lombok.RequiredArgsConstructor;
 import mapple.mapple.exception.ReviewException;
 import mapple.mapple.review.dto.ReadReviewListResponse;
+import mapple.mapple.review.dto.ReadReviewResponse;
 import mapple.mapple.review.entity.Image;
 import mapple.mapple.entity.PublicStatus;
 import mapple.mapple.entity.Rating;
@@ -69,6 +70,13 @@ public class ReviewService {
                 .map(review -> new ReadReviewListResponse(review.getUser().getUsername(), review.getPlaceName(),
                         review.getRating(), review.getUpdatedAt(), review.getCreatedAt()))
                 .toList();
+    }
+
+    public ReadReviewResponse read(long reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ReviewException(ErrorCode.NOT_FOUND_REVIEW));
+        return new ReadReviewResponse(review.getUser().getUsername(), review.getPlaceName(), review.getContent(),
+                review.getUrl(), review.getRating(), review.getCreatedAt(), review.getUpdatedAt());
     }
 
     public List<ReadReviewListResponse> readAllByUserIdentifier(String identifier) {
