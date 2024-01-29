@@ -8,7 +8,7 @@ import mapple.mapple.entity.RequestStatus;
 @NoArgsConstructor
 @Getter
 @AllArgsConstructor
-public class RequestFriendResponse {
+public class ReadFriendResponse {
 
     private String fromUsername;
     private String toUsername;

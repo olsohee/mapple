@@ -33,4 +33,8 @@ public class Friend {
         friend.requestStatus = RequestStatus.REQUEST;
         return friend;
     }
+
+    public void acceptRequest() {
+        this.requestStatus = RequestStatus.ACCEPT;
+    }
 }

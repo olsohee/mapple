@@ -13,11 +13,12 @@ import java.util.Arrays;
 @Getter
 public enum ErrorCode {
 
+    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "unauthorized"),
+
     // user
     DUPLICATED_EMAIL(HttpStatus.BAD_REQUEST, "user.duplicated.email"),
     NOT_FOUND_USER(HttpStatus.BAD_REQUEST, "user.not_found.user"),
     INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "user.invalid.password"),
-    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "user.unauthorized"),
 
 
     // jwt
@@ -35,7 +36,8 @@ public enum ErrorCode {
     NOT_FOUND_RATING(HttpStatus.BAD_REQUEST, "review.not_found.rating"),
 
     // friend
-    CAN_NOT_FRIEND_SAME_USER(HttpStatus.BAD_REQUEST, "friend.can_not_same_user")
+    CAN_NOT_FRIEND_SAME_USER(HttpStatus.BAD_REQUEST, "friend.can_not_same_user"),
+    NOT_FOUND_FRIEND(HttpStatus.BAD_REQUEST, "friend.not_found")
     ;
 
     private final HttpStatus httpStatus;

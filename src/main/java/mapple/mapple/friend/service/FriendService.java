@@ -2,8 +2,9 @@ package mapple.mapple.friend.service;
 
 import lombok.RequiredArgsConstructor;
 import mapple.mapple.exception.ErrorCode;
+import mapple.mapple.exception.FriendException;
 import mapple.mapple.exception.UserException;
-import mapple.mapple.friend.dto.RequestFriendResponse;
+import mapple.mapple.friend.dto.ReadFriendResponse;
 import mapple.mapple.friend.entity.Friend;
 import mapple.mapple.friend.repository.FriendRepository;
 import mapple.mapple.user.entity.User;
@@ -19,16 +20,32 @@ public class FriendService {
     private final UserRepository userRepository;
     private final FriendRepository friendRepository;
 
-    public RequestFriendResponse request(String identifier, long friendId) {
+    public ReadFriendResponse request(String identifier, long userId) {
         User fromUser = userRepository.findByIdentifier(identifier)
                 .orElseThrow(() -> new UserException(ErrorCode.NOT_FOUND_USER));
-        if (fromUser.getId() == friendId) {
-            throw new UserException(ErrorCode.CAN_NOT_FRIEND_SAME_USER);
+        if (fromUser.getId() == userId) {
+            throw new FriendException(ErrorCode.CAN_NOT_FRIEND_SAME_USER);
         }
-        User toUser = userRepository.findById(friendId)
+        User toUser = userRepository.findById(userId)
                 .orElseThrow(() -> new UserException(ErrorCode.NOT_FOUND_USER));
         Friend friend = Friend.create(fromUser, toUser);
         friendRepository.save(friend);
-        return new RequestFriendResponse(fromUser.getUsername(), toUser.getUsername(), friend.getRequestStatus());
+        return new ReadFriendResponse(friend.getFromUser().getUsername(), friend.getToUser().getUsername(), friend.getRequestStatus());
+    }
+
+    public ReadFriendResponse accept(String identifier, long friendId) {
+        Friend friend = friendRepository.findById(friendId)
+                .orElseThrow(() -> new FriendException(ErrorCode.NOT_FOUND_FRIEND));
+        validateAuthorization(identifier, friend);
+        friend.acceptRequest();
+        return new ReadFriendResponse(friend.getFromUser().getUsername(), friend.getToUser().getUsername(), friend.getRequestStatus());
+    }
+
+    private void validateAuthorization(String identifier, Friend friend) {
+        User fromUser = userRepository.findByIdentifier(identifier)
+                .orElseThrow(() -> new UserException(ErrorCode.NOT_FOUND_USER));
+        if (!fromUser.equals(friend.getToUser())) {
+            throw new FriendException(ErrorCode.UNAUTHORIZED);
+        }
     }
 }
