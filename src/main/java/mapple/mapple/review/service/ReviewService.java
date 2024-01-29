@@ -106,6 +106,13 @@ public class ReviewService {
                 review.getPublicStatus(), review.getRating(), review.getCreatedAt());
     }
 
+    public void delete(long reviewId, String identifier) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ReviewException(ErrorCode.NOT_FOUND_REVIEW));
+        validateAuthorization(review, identifier);
+        reviewRepository.delete(review);
+    }
+
     private void validateAuthorization(Review review, String identifier) {
         if (!review.getUser().getIdentifier().equals(identifier)) {
             throw new UserException(ErrorCode.UNAUTHORIZED);

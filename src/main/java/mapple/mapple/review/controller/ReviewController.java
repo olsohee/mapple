@@ -44,4 +44,12 @@ public class ReviewController {
         String identifier = jwtUtils.getIdentifierFromToken(token);
         return reviewService.updateReview(reviewId, identifier, dto, files);
     }
+
+    @DeleteMapping("/review/{reviewId}")
+    public void deleteReview(@PathVariable("reviewId") long reviewId,
+                                             HttpServletRequest request) {
+        String token = jwtUtils.getTokenFromHeader(request);
+        String identifier = jwtUtils.getIdentifierFromToken(token);
+        reviewService.delete(reviewId, identifier);
+    }
 }
