@@ -35,4 +35,12 @@ public class Image {
         review.addImage(image); // 연관관계 편의 메소드 사용
         return image;
     }
+
+    public static Image create(String storedName, String updatedName, String storeDir) {
+        Image image = new Image();
+        image.storedName = storedName;
+        image.updatedName = updatedName;
+        image.storeDir = storeDir;
+        return image;
+    }
 }

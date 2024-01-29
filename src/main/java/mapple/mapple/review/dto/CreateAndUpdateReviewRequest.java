@@ -3,12 +3,10 @@ package mapple.mapple.review.dto;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import mapple.mapple.entity.PublicStatus;
-import mapple.mapple.entity.Rating;
 
 @Getter
 @NoArgsConstructor
-public class CreateReviewRequest {
+public class CreateAndUpdateReviewRequest {
 
     @NotBlank
     private String placeName;

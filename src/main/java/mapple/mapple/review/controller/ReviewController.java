@@ -3,8 +3,8 @@ package mapple.mapple.review.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import mapple.mapple.jwt.JwtUtils;
-import mapple.mapple.review.dto.CreateReviewRequest;
-import mapple.mapple.review.dto.CreateReviewResponse;
+import mapple.mapple.review.dto.CreateAndUpdateReviewRequest;
+import mapple.mapple.review.dto.CreateAndUpdateReviewResponse;
 import mapple.mapple.review.dto.ReadReviewListResponse;
 import mapple.mapple.review.service.ReviewService;
 import org.springframework.validation.annotation.Validated;
@@ -22,16 +22,26 @@ public class ReviewController {
     private final JwtUtils jwtUtils;
 
     @PostMapping("/review")
-    public CreateReviewResponse createReview(@Validated @RequestPart CreateReviewRequest dto,
-                                             @RequestPart(required = false) List<MultipartFile> files,
-                                             HttpServletRequest request) throws IOException {
+    public CreateAndUpdateReviewResponse createReview(@Validated @RequestPart CreateAndUpdateReviewRequest dto,
+                                                      @RequestPart(required = false) List<MultipartFile> files,
+                                                      HttpServletRequest request) throws IOException {
         String token = jwtUtils.getTokenFromHeader(request);
-        String email = jwtUtils.getIdentifierFromToken(token);
-        return reviewService.createReview(dto, files, email);
+        String identifier = jwtUtils.getIdentifierFromToken(token);
+        return reviewService.createReview(dto, files, identifier);
     }
 
     @GetMapping("/reviews")
     public List<ReadReviewListResponse> readAll() {
         return reviewService.readAll();
+    }
+
+    @PutMapping("/review/{reviewId}")
+    public CreateAndUpdateReviewResponse updateReview(@Validated @RequestPart CreateAndUpdateReviewRequest dto,
+                                                      @RequestPart(required = false) List<MultipartFile> files,
+                                                      @PathVariable("reviewId") long reviewId,
+                                                      HttpServletRequest request) throws IOException {
+        String token = jwtUtils.getTokenFromHeader(request);
+        String identifier = jwtUtils.getIdentifierFromToken(token);
+        return reviewService.updateReview(reviewId, identifier, dto, files);
     }
 }

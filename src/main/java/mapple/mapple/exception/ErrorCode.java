@@ -13,11 +13,12 @@ import java.util.Arrays;
 @Getter
 public enum ErrorCode {
 
+    // user
     DUPLICATED_EMAIL(HttpStatus.BAD_REQUEST, "user.duplicated.email"),
     NOT_FOUND_EMAIL(HttpStatus.BAD_REQUEST, "user.not_found.email"),
     INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "user.invalid.password"),
-    NOT_FOUND_PUBLIC_STATUS(HttpStatus.BAD_REQUEST, "review.not_found.public_status"),
-    NOT_FOUND_RATING(HttpStatus.BAD_REQUEST, "review.not_found.rating"),
+    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "user.unauthorized"),
+
 
     // jwt
     NOT_INPUT_TOKEN(HttpStatus.BAD_REQUEST, "jwt.not_input"),
@@ -26,8 +27,12 @@ public enum ErrorCode {
     NOT_FOUND_TOKEN_IN_REDIS(HttpStatus.BAD_REQUEST, "jwt.not_found"),
 
     // oAuth
-    NOT_FOUND_PROVIDER(HttpStatus.BAD_REQUEST, "oauth.not_found.provider")
+    NOT_FOUND_PROVIDER(HttpStatus.BAD_REQUEST, "oauth.not_found.provider"),
 
+    // review
+    NOT_FOUND_REVIEW(HttpStatus.BAD_REQUEST, "review.not_found"),
+    NOT_FOUND_PUBLIC_STATUS(HttpStatus.BAD_REQUEST, "review.not_found.public_status"),
+    NOT_FOUND_RATING(HttpStatus.BAD_REQUEST, "review.not_found.rating")
     ;
 
     private final HttpStatus httpStatus;

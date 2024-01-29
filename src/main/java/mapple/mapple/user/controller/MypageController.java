@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 import mapple.mapple.jwt.JwtUtils;
 import mapple.mapple.review.dto.ReadReviewListResponse;
 import mapple.mapple.review.service.ReviewService;
-import mapple.mapple.user.service.UserService;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;

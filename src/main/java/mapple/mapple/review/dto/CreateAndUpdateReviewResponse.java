@@ -1,6 +1,5 @@
 package mapple.mapple.review.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,7 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateReviewResponse {
+public class CreateAndUpdateReviewResponse {
 
     private String placeName;
     private String content;
