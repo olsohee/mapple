@@ -1,0 +1,16 @@
+package mapple.mapple.friend.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import mapple.mapple.entity.RequestStatus;
+
+@NoArgsConstructor
+@Getter
+@AllArgsConstructor
+public class RequestFriendResponse {
+
+    private String fromUsername;
+    private String toUsername;
+    private RequestStatus requestStatus;
+}

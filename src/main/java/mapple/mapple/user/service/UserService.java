@@ -51,7 +51,7 @@ public class UserService {
 
     private User validateEmail(String email) {
         return userRepository.findByIdentifier(email)
-                .orElseThrow(() -> new UserException(ErrorCode.NOT_FOUND_EMAIL));
+                .orElseThrow(() -> new UserException(ErrorCode.NOT_FOUND_USER));
     }
 
     private void validatePassword(User user, String password) {

@@ -15,7 +15,7 @@ public enum ErrorCode {
 
     // user
     DUPLICATED_EMAIL(HttpStatus.BAD_REQUEST, "user.duplicated.email"),
-    NOT_FOUND_EMAIL(HttpStatus.BAD_REQUEST, "user.not_found.email"),
+    NOT_FOUND_USER(HttpStatus.BAD_REQUEST, "user.not_found.user"),
     INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "user.invalid.password"),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "user.unauthorized"),
 
@@ -32,7 +32,10 @@ public enum ErrorCode {
     // review
     NOT_FOUND_REVIEW(HttpStatus.BAD_REQUEST, "review.not_found"),
     NOT_FOUND_PUBLIC_STATUS(HttpStatus.BAD_REQUEST, "review.not_found.public_status"),
-    NOT_FOUND_RATING(HttpStatus.BAD_REQUEST, "review.not_found.rating")
+    NOT_FOUND_RATING(HttpStatus.BAD_REQUEST, "review.not_found.rating"),
+
+    // friend
+    CAN_NOT_FRIEND_SAME_USER(HttpStatus.BAD_REQUEST, "friend.can_not_same_user")
     ;
 
     private final HttpStatus httpStatus;

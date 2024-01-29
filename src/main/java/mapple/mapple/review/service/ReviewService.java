@@ -49,7 +49,7 @@ public class ReviewService {
 
     public CreateAndUpdateReviewResponse createReview(CreateAndUpdateReviewRequest dto, List<MultipartFile> files, String email) throws IOException {
         User user = userRepository.findByIdentifier(email)
-                .orElseThrow(() -> new UserException(ErrorCode.NOT_FOUND_EMAIL));
+                .orElseThrow(() -> new UserException(ErrorCode.NOT_FOUND_USER));
 
         Review review = Review.create(dto.getPlaceName(), dto.getContent(), dto.getUrl(),
                 PublicStatus.find(dto.getPublicStatus()), Rating.find(dto.getRating()), user);
@@ -65,7 +65,7 @@ public class ReviewService {
 
     public List<ReadReviewListResponse> readAllByUserIdentifier(String identifier) {
         User user = userRepository.findByIdentifier(identifier)
-                .orElseThrow(() -> new UserException(ErrorCode.NOT_FOUND_EMAIL));
+                .orElseThrow(() -> new UserException(ErrorCode.NOT_FOUND_USER));
         List<Review> reviews = reviewRepository.findByUserId(user.getId());
         return reviews.stream()
                 .map(review -> new ReadReviewListResponse(review.getUser().getUsername(), review.getPlaceName(),
