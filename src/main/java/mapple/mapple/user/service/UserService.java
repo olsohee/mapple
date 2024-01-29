@@ -1,10 +1,13 @@
 package mapple.mapple.user.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import mapple.mapple.exception.CustomJwtException;
 import mapple.mapple.jwt.JwtDto;
 import mapple.mapple.jwt.JwtUtils;
+import mapple.mapple.redis.RefreshToken;
+import mapple.mapple.redis.RefreshTokenRepository;
 import mapple.mapple.user.dto.LoginRequest;
-import mapple.mapple.user.dto.OAuthJoinRequest;
 import mapple.mapple.user.entity.User;
 import mapple.mapple.exception.ErrorCode;
 import mapple.mapple.exception.UserException;
@@ -21,6 +24,7 @@ public class UserService {
 
     private final JwtUtils jwtUtils;
     private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     public JoinResponse join(JoinRequest dto) {
         validateDuplication(dto.getEmail());
@@ -38,7 +42,11 @@ public class UserService {
     public JwtDto login(LoginRequest dto) {
         User user = validateEmail(dto.getEmail());
         validatePassword(user, dto.getPassword());
-        return jwtUtils.generateToken(dto.getEmail());
+        JwtDto jwtDto = jwtUtils.generateToken(dto.getEmail());
+        // refresh token redis 저장
+        String refreshToken = jwtDto.getRefreshToken();
+        refreshTokenRepository.save(new RefreshToken(user.getIdentifier(), refreshToken));
+        return jwtDto;
     }
 
     private User validateEmail(String email) {
@@ -50,5 +58,22 @@ public class UserService {
         if (!user.getPassword().equals(password)) {
             throw new UserException(ErrorCode.INVALID_PASSWORD);
         }
+    }
+
+    public JwtDto renewToken(HttpServletRequest request) {
+        String refreshToken = jwtUtils.getTokenFromHeader(request);
+        // refresh token 유효성 검사
+        String identifier = jwtUtils.validateRefreshToken(refreshToken);
+        // redis의 refresh token과 동일한지 검사
+        RefreshToken savedToken = refreshTokenRepository.findById(identifier)
+                .orElseThrow(() -> new CustomJwtException(ErrorCode.NOT_FOUND_TOKEN_IN_REDIS));
+        if (!savedToken.getRefreshToken().equals(refreshToken)) {
+            throw new CustomJwtException(ErrorCode.EXPIRED_TOKEN);
+        }
+        // 기존에 redis에 저장된 토큰 삭제 후 재발급 후 저장
+        JwtDto jwtDto = jwtUtils.generateToken(identifier);
+        savedToken.setRefreshToken(jwtDto.getRefreshToken());
+        refreshTokenRepository.save(savedToken);
+        return jwtDto;
     }
 }

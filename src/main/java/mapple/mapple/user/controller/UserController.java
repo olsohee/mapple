@@ -42,8 +42,6 @@ public class UserController {
      */
     @PostMapping("/token")
     public JwtDto renewToken(HttpServletRequest request) {
-        String refreshToken = jwtUtils.getTokenFromHeader(request);
-        String email = jwtUtils.validateRefreshToken(refreshToken);
-        return jwtUtils.generateToken(email);
+        return userService.renewToken(request);
     }
 }

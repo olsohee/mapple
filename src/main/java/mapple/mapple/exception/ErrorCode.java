@@ -23,6 +23,7 @@ public enum ErrorCode {
     NOT_INPUT_TOKEN(HttpStatus.BAD_REQUEST, "jwt.not_input"),
     EXPIRED_TOKEN(HttpStatus.BAD_REQUEST, "jwt.expired"),
     INVALID_TOKEN(HttpStatus.BAD_REQUEST, "jwt.invalid"),
+    NOT_FOUND_TOKEN_IN_REDIS(HttpStatus.BAD_REQUEST, "jwt.not_found"),
 
     // oAuth
     NOT_FOUND_PROVIDER(HttpStatus.BAD_REQUEST, "oauth.not_found.provider")

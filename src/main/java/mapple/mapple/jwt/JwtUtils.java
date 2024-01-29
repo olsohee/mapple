@@ -75,13 +75,13 @@ public class JwtUtils {
     }
 
     /**
-     * Refresh Token 토큰 유효성 검증 후 유효하면 email 반환
+     * Refresh Token 토큰 유효성 검증 후 유효하면 identifier 반환
      */
     public String validateRefreshToken(String refreshToken) {
         try {
             Jws<Claims> claims = jwtParser.parseClaimsJws(refreshToken);
-            String email = claims.getBody().getSubject();
-            return email;
+            String identifier = claims.getBody().getSubject();
+            return identifier;
         } catch (ExpiredJwtException e) {
             throw new CustomJwtException(ErrorCode.EXPIRED_TOKEN);
         } catch (JwtException e) {
