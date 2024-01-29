@@ -8,9 +8,13 @@ import mapple.mapple.entity.BaseEntity;
 import mapple.mapple.entity.PublicStatus;
 import mapple.mapple.entity.Rating;
 import mapple.mapple.user.entity.User;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -75,10 +79,30 @@ public class Review extends BaseEntity {
         this.url = url;
     }
 
-    public void updateImages(List<Image> images) {
+    public void updateImages(List<MultipartFile> files, String reviewImageFileDir) throws IOException {
+        List<Image> images = new ArrayList<>();
+        for (MultipartFile file : files) {
+            String updatedName = file.getOriginalFilename();
+            String storedName = getStoredName(updatedName);
+            file.transferTo(new File(reviewImageFileDir + storedName));
+
+            Image image = Image.create(storedName, updatedName, reviewImageFileDir);
+            images.add(image);
+        }
+
         this.images.clear();
         for (Image image : images) {
             this.images.add(image);
         }
+    }
+
+    private String getStoredName(String updatedName) {
+        int pos = updatedName.lastIndexOf(".");
+        String ext = updatedName.substring(pos + 1);
+        return UUID.randomUUID() + "." + ext;
+    }
+
+    public void deleteImages() {
+        this.images.clear();
     }
 }

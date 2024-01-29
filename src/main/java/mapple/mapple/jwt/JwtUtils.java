@@ -63,6 +63,11 @@ public class JwtUtils {
         }
     }
 
+    public String getIdentifierFromHeader(HttpServletRequest request) {
+        String token = getTokenFromHeader(request);
+        return getIdentifierFromToken(token);
+    }
+
     public boolean validateAccessToken(String accessToken) {
         try {
             jwtParser.parseClaimsJws(accessToken);

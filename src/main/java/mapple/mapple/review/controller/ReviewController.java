@@ -33,29 +33,26 @@ public class ReviewController {
     }
 
     @PostMapping("/review")
-    public CreateAndUpdateReviewResponse createReview(@Validated @RequestPart CreateAndUpdateReviewRequest dto,
-                                                      @RequestPart(required = false) List<MultipartFile> files,
-                                                      HttpServletRequest request) throws IOException {
-        String token = jwtUtils.getTokenFromHeader(request);
-        String identifier = jwtUtils.getIdentifierFromToken(token);
+    public CreateAndUpdateReviewResponse create(@Validated @RequestPart CreateAndUpdateReviewRequest dto,
+                                                @RequestPart(required = false) List<MultipartFile> files,
+                                                HttpServletRequest request) throws IOException {
+        String identifier = jwtUtils.getIdentifierFromHeader(request);
         return reviewService.createReview(dto, files, identifier);
     }
 
     @PutMapping("/review/{reviewId}")
-    public CreateAndUpdateReviewResponse updateReview(@Validated @RequestPart CreateAndUpdateReviewRequest dto,
-                                                      @RequestPart(required = false) List<MultipartFile> files,
-                                                      @PathVariable("reviewId") long reviewId,
-                                                      HttpServletRequest request) throws IOException {
-        String token = jwtUtils.getTokenFromHeader(request);
-        String identifier = jwtUtils.getIdentifierFromToken(token);
+    public CreateAndUpdateReviewResponse update(@Validated @RequestPart CreateAndUpdateReviewRequest dto,
+                                                @RequestPart(required = false) List<MultipartFile> files,
+                                                @PathVariable("reviewId") long reviewId,
+                                                HttpServletRequest request) throws IOException {
+        String identifier = jwtUtils.getIdentifierFromHeader(request);
         return reviewService.updateReview(reviewId, identifier, dto, files);
     }
 
     @DeleteMapping("/review/{reviewId}")
-    public void deleteReview(@PathVariable("reviewId") long reviewId,
-                                             HttpServletRequest request) {
-        String token = jwtUtils.getTokenFromHeader(request);
-        String identifier = jwtUtils.getIdentifierFromToken(token);
+    public void delete(@PathVariable("reviewId") long reviewId,
+                       HttpServletRequest request) {
+        String identifier = jwtUtils.getIdentifierFromHeader(request);
         reviewService.delete(reviewId, identifier);
     }
 }

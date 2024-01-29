@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import mapple.mapple.exception.ReviewException;
 import mapple.mapple.review.dto.ReadReviewListResponse;
 import mapple.mapple.review.dto.ReadReviewResponse;
-import mapple.mapple.review.entity.Image;
 import mapple.mapple.entity.PublicStatus;
 import mapple.mapple.entity.Rating;
 import mapple.mapple.exception.ErrorCode;
@@ -20,11 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @Transactional
@@ -37,33 +33,6 @@ public class ReviewService {
     @Value("${file.dir.review_image}")
     private String reviewImageFileDir;
 
-    public CreateAndUpdateReviewResponse createReview(CreateAndUpdateReviewRequest dto, List<MultipartFile> files, String email) throws IOException {
-        User user = userRepository.findByIdentifier(email)
-                .orElseThrow(() -> new UserException(ErrorCode.NOT_FOUND_EMAIL));
-
-        Review review = Review.create(dto.getPlaceName(), dto.getContent(), dto.getUrl(),
-                PublicStatus.find(dto.getPublicStatus()), Rating.find(dto.getRating()), user);
-
-        for (MultipartFile file : files) {
-            String updatedName = file.getOriginalFilename();
-            String storedName = getStoredName(updatedName);
-            file.transferTo(new File(reviewImageFileDir + storedName));
-
-            Image image = Image.create(storedName, updatedName, reviewImageFileDir);
-            review.addImage(image);
-        }
-
-        reviewRepository.save(review);
-        return new CreateAndUpdateReviewResponse(review.getPlaceName(), review.getContent(), review.getUrl(),
-                review.getPublicStatus(), review.getRating(), review.getCreatedAt());
-    }
-
-    private String getStoredName(String updatedName) {
-        int pos = updatedName.lastIndexOf(".");
-        String ext = updatedName.substring(pos + 1);
-        return UUID.randomUUID() + "." + ext;
-    }
-
     public List<ReadReviewListResponse> readAll() {
         List<Review> reviews = reviewRepository.findAll();
         return reviews.stream()
@@ -73,10 +42,25 @@ public class ReviewService {
     }
 
     public ReadReviewResponse read(long reviewId) {
-        Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new ReviewException(ErrorCode.NOT_FOUND_REVIEW));
+        Review review = findReviewById(reviewId);
         return new ReadReviewResponse(review.getUser().getUsername(), review.getPlaceName(), review.getContent(),
                 review.getUrl(), review.getRating(), review.getCreatedAt(), review.getUpdatedAt());
+    }
+
+    public CreateAndUpdateReviewResponse createReview(CreateAndUpdateReviewRequest dto, List<MultipartFile> files, String email) throws IOException {
+        User user = userRepository.findByIdentifier(email)
+                .orElseThrow(() -> new UserException(ErrorCode.NOT_FOUND_EMAIL));
+
+        Review review = Review.create(dto.getPlaceName(), dto.getContent(), dto.getUrl(),
+                PublicStatus.find(dto.getPublicStatus()), Rating.find(dto.getRating()), user);
+
+        if (files != null) {
+            review.updateImages(files, reviewImageFileDir);
+        }
+
+        reviewRepository.save(review);
+        return new CreateAndUpdateReviewResponse(review.getPlaceName(), review.getContent(), review.getUrl(),
+                review.getPublicStatus(), review.getRating(), review.getCreatedAt());
     }
 
     public List<ReadReviewListResponse> readAllByUserIdentifier(String identifier) {
@@ -90,35 +74,31 @@ public class ReviewService {
     }
 
     public CreateAndUpdateReviewResponse updateReview(long reviewId, String identifier, CreateAndUpdateReviewRequest dto, List<MultipartFile> files) throws IOException {
-        Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new ReviewException(ErrorCode.NOT_FOUND_REVIEW));
+        Review review = findReviewById(reviewId);
         validateAuthorization(review, identifier);
 
         review.update(dto.getPlaceName(), dto.getContent(), Rating.find(dto.getRating()),
                 PublicStatus.find(dto.getPublicStatus()), dto.getUrl());
 
-        List<Image> images = new ArrayList<>();
-        if (files != null) {
-            for (MultipartFile file : files) {
-                String updatedName = file.getOriginalFilename();
-                String storedName = getStoredName(updatedName);
-                file.transferTo(new File(reviewImageFileDir + storedName));
-
-                Image image = Image.create(storedName, updatedName, reviewImageFileDir);
-                images.add(image);
-            }
+        if (files == null) {
+            review.deleteImages();
+        } else {
+            review.updateImages(files, reviewImageFileDir);
         }
-        review.updateImages(images);
 
         return new CreateAndUpdateReviewResponse(review.getPlaceName(), review.getContent(), review.getUrl(),
                 review.getPublicStatus(), review.getRating(), review.getCreatedAt());
     }
 
     public void delete(long reviewId, String identifier) {
-        Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new ReviewException(ErrorCode.NOT_FOUND_REVIEW));
+        Review review = findReviewById(reviewId);
         validateAuthorization(review, identifier);
         reviewRepository.delete(review);
+    }
+
+    private Review findReviewById(long reviewId) {
+        return reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ReviewException(ErrorCode.NOT_FOUND_REVIEW));
     }
 
     private void validateAuthorization(Review review, String identifier) {
