@@ -29,4 +29,11 @@ public class FriendController {
         String identifier = jwtUtils.getIdentifierFromHeader(request);
         return friendService.accept(identifier, friendId);
     }
+
+    @PostMapping("/friend/refuse/{friendId}")
+    public void refuseFriendRequest(@PathVariable("friendId") long friendId,
+                                                  HttpServletRequest request) {
+        String identifier = jwtUtils.getIdentifierFromHeader(request);
+        friendService.refuse(identifier, friendId);
+    }
 }

@@ -41,6 +41,13 @@ public class FriendService {
         return new ReadFriendResponse(friend.getFromUser().getUsername(), friend.getToUser().getUsername(), friend.getRequestStatus());
     }
 
+    public void refuse(String identifier, long friendId) {
+        Friend friend = friendRepository.findById(friendId)
+                .orElseThrow(() -> new FriendException(ErrorCode.NOT_FOUND_FRIEND));
+        validateAuthorization(identifier, friend);
+        friendRepository.delete(friend);
+    }
+
     private void validateAuthorization(String identifier, Friend friend) {
         User fromUser = userRepository.findByIdentifier(identifier)
                 .orElseThrow(() -> new UserException(ErrorCode.NOT_FOUND_USER));
