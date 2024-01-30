@@ -23,8 +23,9 @@ public class ReviewController {
     private final JwtUtils jwtUtils;
 
     @GetMapping("/reviews")
-    public List<ReadReviewListResponse> readAll() {
-        return reviewService.readAll();
+    public List<ReadReviewListResponse> readAll(HttpServletRequest request) {
+        String identifier = jwtUtils.getIdentifierFromHeader(request);
+        return reviewService.readAll(identifier);
     }
 
     @GetMapping("/reviews/friend")

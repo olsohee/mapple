@@ -111,4 +111,17 @@ public class Review extends BaseEntity {
         return friends.stream()
                 .anyMatch(friend -> friend.getToUser() == this.user);
     }
+
+    public boolean isPublic() {
+        return publicStatus == PublicStatus.PUBLIC;
+    }
+
+    public boolean canRead(List<Friend> friends) {
+        return friends.stream()
+                .anyMatch(friend -> (friend.getToUser() == this.user) && publicStatus == PublicStatus.ONLY_FRIEND);
+    }
+
+    public boolean isPrivate() {
+        return publicStatus == PublicStatus.PRIVATE;
+    }
 }

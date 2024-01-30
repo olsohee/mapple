@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -37,8 +36,16 @@ public class ReviewService {
     @Value("${file.dir.review_image}")
     private String reviewImageFileDir;
 
-    public List<ReadReviewListResponse> readAll() {
-        List<Review> reviews = reviewRepository.findAll();
+    public List<ReadReviewListResponse> readAll(String identifier) {
+        User user = userRepository.findByIdentifier(identifier)
+                .orElseThrow(() -> new UserException(ErrorCode.NOT_FOUND_USER));
+        List<Friend> friends = friendQueryRepository.findFriendsByUser(user);
+
+        // 전체 공개 + 친구이면 친구 공개인 리뷰
+        List<Review> reviews = reviewRepository.findAll().stream()
+                .filter(review -> review.isPublic() || review.canRead(friends))
+                .toList();
+
         return reviews.stream()
                 .map(review -> new ReadReviewListResponse(review.getUser().getUsername(), review.getPlaceName(),
                         review.getRating(), review.getUpdatedAt(), review.getCreatedAt()))
@@ -52,7 +59,7 @@ public class ReviewService {
         List<Friend> friends = friendQueryRepository.findFriendsByUser(user);
 
         List<Review> friendsReviews = reviewRepository.findAll().stream()
-                .filter(review -> review.checkIsFriendsReview(friends))
+                .filter(review -> review.checkIsFriendsReview(friends) && !review.isPrivate())
                 .toList();
         return friendsReviews.stream()
                 .map(review -> new ReadReviewListResponse(review.getUser().getUsername(), review.getPlaceName(),
