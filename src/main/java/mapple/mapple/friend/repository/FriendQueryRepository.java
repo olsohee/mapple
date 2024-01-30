@@ -2,7 +2,7 @@ package mapple.mapple.friend.repository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import mapple.mapple.entity.RequestStatus;
+import mapple.mapple.friend.entity.RequestStatus;
 import mapple.mapple.friend.entity.Friend;
 import mapple.mapple.user.entity.User;
 import org.springframework.stereotype.Repository;

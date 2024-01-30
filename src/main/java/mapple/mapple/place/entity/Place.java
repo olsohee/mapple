@@ -1,7 +1,9 @@
-package mapple.mapple.entity;
+package mapple.mapple.place.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import mapple.mapple.entity.BaseEntity;
+import mapple.mapple.entity.PublicStatus;
 import mapple.mapple.meeting.entity.Meeting;
 
 @Entity
@@ -26,4 +28,15 @@ public class Place extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "group_id")
     private Meeting meeting;
+
+    public static Place create(Meeting meeting, String placeName, String content,
+                              String url, PublicStatus publicStatus) {
+        Place place = new Place();
+        place.meeting = meeting;
+        place.placeName = placeName;
+        place.content = content;
+        place.url = url;
+        place.publicStatus = publicStatus;
+        return place;
+    }
 }

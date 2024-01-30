@@ -7,7 +7,7 @@ import mapple.mapple.friend.repository.FriendQueryRepository;
 import mapple.mapple.review.dto.ReadReviewListResponse;
 import mapple.mapple.review.dto.ReadReviewResponse;
 import mapple.mapple.entity.PublicStatus;
-import mapple.mapple.entity.Rating;
+import mapple.mapple.review.entity.Rating;
 import mapple.mapple.exception.ErrorCode;
 import mapple.mapple.exception.UserException;
 import mapple.mapple.review.entity.Review;

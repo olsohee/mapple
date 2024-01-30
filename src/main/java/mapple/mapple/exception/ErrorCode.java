@@ -37,7 +37,10 @@ public enum ErrorCode {
 
     // friend
     CAN_NOT_FRIEND_SAME_USER(HttpStatus.BAD_REQUEST, "friend.can_not_same_user"),
-    NOT_FOUND_FRIEND(HttpStatus.BAD_REQUEST, "friend.not_found")
+    NOT_FOUND_FRIEND(HttpStatus.BAD_REQUEST, "friend.not_found"),
+
+    // meeting
+    NOT_FOUND_MEETING(HttpStatus.BAD_REQUEST, "meeting.not_found"),
     ;
 
     private final HttpStatus httpStatus;

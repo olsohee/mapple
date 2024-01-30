@@ -2,7 +2,6 @@ package mapple.mapple.friend.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-import mapple.mapple.entity.RequestStatus;
 import mapple.mapple.user.entity.User;
 
 @Entity

@@ -24,7 +24,11 @@ public class UserMeeting {
     public static UserMeeting create(User user, Meeting meeting) {
         UserMeeting userMeeting = new UserMeeting();
         userMeeting.user = user;
-        userMeeting.meeting = meeting;
+        meeting.addUserMeeting(userMeeting); // 연관관계 편의 메소드
         return userMeeting;
+    }
+
+    public void setMeeting(Meeting meeting) {
+        this.meeting = meeting;
     }
 }

@@ -1,4 +1,4 @@
-package mapple.mapple.entity;
+package mapple.mapple.friend.entity;
 
 public enum RequestStatus {
 

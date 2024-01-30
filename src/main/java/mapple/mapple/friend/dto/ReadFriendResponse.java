@@ -3,7 +3,7 @@ package mapple.mapple.friend.dto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import mapple.mapple.entity.RequestStatus;
+import mapple.mapple.friend.entity.RequestStatus;
 
 @NoArgsConstructor
 @Getter

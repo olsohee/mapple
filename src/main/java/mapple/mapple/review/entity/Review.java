@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import mapple.mapple.entity.BaseEntity;
 import mapple.mapple.entity.PublicStatus;
-import mapple.mapple.entity.Rating;
 import mapple.mapple.friend.entity.Friend;
 import mapple.mapple.user.entity.User;
 import org.springframework.web.multipart.MultipartFile;

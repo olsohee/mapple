@@ -1,4 +1,4 @@
-package mapple.mapple.entity;
+package mapple.mapple.review.entity;
 
 import lombok.AllArgsConstructor;
 import mapple.mapple.exception.ErrorCode;

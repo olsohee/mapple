@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import mapple.mapple.entity.PublicStatus;
-import mapple.mapple.entity.Rating;
+import mapple.mapple.review.entity.Rating;
 
 import java.time.LocalDateTime;
 
