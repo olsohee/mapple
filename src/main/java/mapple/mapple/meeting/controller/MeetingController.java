@@ -1,0 +1,26 @@
+package mapple.mapple.meeting.controller;
+
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import mapple.mapple.jwt.JwtUtils;
+import mapple.mapple.meeting.dto.CreateMeetingRequest;
+import mapple.mapple.meeting.dto.CreateMeetingResponse;
+import mapple.mapple.meeting.service.MeetingService;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequiredArgsConstructor
+public class MeetingController {
+
+    private final MeetingService meetingService;
+    private final JwtUtils jwtUtils;
+
+    @PostMapping("/meeting")
+    public CreateMeetingResponse create(@RequestBody CreateMeetingRequest dto,
+                                        HttpServletRequest request) {
+        String identifier = jwtUtils.getIdentifierFromHeader(request);
+        return meetingService.create(dto, identifier);
+    }
+}
