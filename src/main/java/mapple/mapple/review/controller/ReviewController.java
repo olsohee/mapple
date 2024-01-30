@@ -27,6 +27,12 @@ public class ReviewController {
         return reviewService.readAll();
     }
 
+    @GetMapping("/reviews/friend")
+    public List<ReadReviewListResponse> readFriendsReviews(HttpServletRequest request) {
+        String identifier = jwtUtils.getIdentifierFromHeader(request);
+        return reviewService.readFriendsReviews(identifier);
+    }
+
     @GetMapping("/review/{reviewId}")
     public ReadReviewResponse read(@PathVariable("reviewId") long reviewId) {
         return reviewService.read(reviewId);
@@ -50,8 +56,7 @@ public class ReviewController {
     }
 
     @DeleteMapping("/review/{reviewId}")
-    public void delete(@PathVariable("reviewId") long reviewId,
-                       HttpServletRequest request) {
+    public void delete(@PathVariable("reviewId") long reviewId, HttpServletRequest request) {
         String identifier = jwtUtils.getIdentifierFromHeader(request);
         reviewService.delete(reviewId, identifier);
     }

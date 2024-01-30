@@ -34,6 +34,14 @@ public class Friend {
         return friend;
     }
 
+    public static Friend createReverse(User fromUser, User toUser) {
+        Friend friend = new Friend();
+        friend.fromUser = toUser;
+        friend.toUser = fromUser;
+        friend.requestStatus = RequestStatus.ACCEPT;
+        return friend;
+    }
+
     public void acceptRequest() {
         this.requestStatus = RequestStatus.ACCEPT;
     }

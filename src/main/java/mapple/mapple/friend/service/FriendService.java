@@ -38,6 +38,8 @@ public class FriendService {
                 .orElseThrow(() -> new FriendException(ErrorCode.NOT_FOUND_FRIEND));
         validateAuthorization(identifier, friend);
         friend.acceptRequest();
+        Friend reverseFriend = Friend.createReverse(friend.getFromUser(), friend.getToUser());
+        friendRepository.save(reverseFriend);
         return new ReadFriendResponse(friend.getFromUser().getUsername(), friend.getToUser().getUsername(), friend.getRequestStatus());
     }
 

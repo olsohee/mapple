@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import mapple.mapple.entity.BaseEntity;
 import mapple.mapple.entity.PublicStatus;
 import mapple.mapple.entity.Rating;
+import mapple.mapple.friend.entity.Friend;
 import mapple.mapple.user.entity.User;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -104,5 +105,10 @@ public class Review extends BaseEntity {
 
     public void deleteImages() {
         this.images.clear();
+    }
+
+    public boolean checkIsFriendsReview(List<Friend> friends) {
+        return friends.stream()
+                .anyMatch(friend -> friend.getToUser() == this.user);
     }
 }

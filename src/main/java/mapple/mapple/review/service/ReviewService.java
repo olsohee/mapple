@@ -2,6 +2,8 @@ package mapple.mapple.review.service;
 
 import lombok.RequiredArgsConstructor;
 import mapple.mapple.exception.ReviewException;
+import mapple.mapple.friend.entity.Friend;
+import mapple.mapple.friend.repository.FriendQueryRepository;
 import mapple.mapple.review.dto.ReadReviewListResponse;
 import mapple.mapple.review.dto.ReadReviewResponse;
 import mapple.mapple.entity.PublicStatus;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -29,6 +32,7 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
+    private final FriendQueryRepository friendQueryRepository;
 
     @Value("${file.dir.review_image}")
     private String reviewImageFileDir;
@@ -36,6 +40,21 @@ public class ReviewService {
     public List<ReadReviewListResponse> readAll() {
         List<Review> reviews = reviewRepository.findAll();
         return reviews.stream()
+                .map(review -> new ReadReviewListResponse(review.getUser().getUsername(), review.getPlaceName(),
+                        review.getRating(), review.getUpdatedAt(), review.getCreatedAt()))
+                .toList();
+    }
+
+    public List<ReadReviewListResponse> readFriendsReviews(String identifier) {
+        User user = userRepository.findByIdentifier(identifier)
+                .orElseThrow(() -> new UserException(ErrorCode.NOT_FOUND_USER));
+
+        List<Friend> friends = friendQueryRepository.findFriendsByUser(user);
+
+        List<Review> friendsReviews = reviewRepository.findAll().stream()
+                .filter(review -> review.checkIsFriendsReview(friends))
+                .toList();
+        return friendsReviews.stream()
                 .map(review -> new ReadReviewListResponse(review.getUser().getUsername(), review.getPlaceName(),
                         review.getRating(), review.getUpdatedAt(), review.getCreatedAt()))
                 .toList();
