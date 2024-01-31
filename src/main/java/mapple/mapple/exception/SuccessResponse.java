@@ -4,11 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
-public class ErrorResponse {
+@NoArgsConstructor
+@AllArgsConstructor
+public class SuccessResponse {
 
-    private String code;
     private String message;
+    private Object data;
 }

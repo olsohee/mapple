@@ -3,8 +3,8 @@ package mapple.mapple.jwt;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
-import mapple.mapple.exception.ErrorCode;
-import mapple.mapple.exception.CustomJwtException;
+import mapple.mapple.exception.ErrorCodeAndMessage;
+import mapple.mapple.exception.customException.CustomJwtException;
 import mapple.mapple.user.entity.CustomUserDetails;
 import mapple.mapple.user.service.UserDetailManager;
 import org.springframework.beans.factory.annotation.Value;
@@ -59,7 +59,7 @@ public class JwtUtils {
         if (header != null && header.startsWith("Bearer ")) {
             return header.split(" ")[1];
         } else {
-            throw new CustomJwtException(ErrorCode.NOT_INPUT_TOKEN);
+            throw new CustomJwtException(ErrorCodeAndMessage.REQUIRED_TOKEN);
         }
     }
 
@@ -73,9 +73,9 @@ public class JwtUtils {
             jwtParser.parseClaimsJws(accessToken);
             return true;
         } catch (ExpiredJwtException e) {
-            throw new CustomJwtException(ErrorCode.EXPIRED_TOKEN);
+            throw new CustomJwtException(ErrorCodeAndMessage.EXPIRED_TOKEN);
         } catch (JwtException e) {
-            throw new CustomJwtException(ErrorCode.INVALID_TOKEN);
+            throw new CustomJwtException(ErrorCodeAndMessage.INVALID_TOKEN);
         }
     }
 
@@ -88,9 +88,9 @@ public class JwtUtils {
             String identifier = claims.getBody().getSubject();
             return identifier;
         } catch (ExpiredJwtException e) {
-            throw new CustomJwtException(ErrorCode.EXPIRED_TOKEN);
+            throw new CustomJwtException(ErrorCodeAndMessage.EXPIRED_TOKEN);
         } catch (JwtException e) {
-            throw new CustomJwtException(ErrorCode.INVALID_TOKEN);
+            throw new CustomJwtException(ErrorCodeAndMessage.INVALID_TOKEN);
         }
     }
 

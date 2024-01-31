@@ -1,8 +1,8 @@
 package mapple.mapple.user.entity;
 
 import lombok.AllArgsConstructor;
-import mapple.mapple.exception.ErrorCode;
-import mapple.mapple.exception.OAuthException;
+import mapple.mapple.exception.ErrorCodeAndMessage;
+import mapple.mapple.exception.customException.OAuthException;
 
 import java.util.Arrays;
 
@@ -19,6 +19,6 @@ public enum OAuthProvider {
         return Arrays.stream(OAuthProvider.values())
                 .filter(oAuthProvider -> oAuthProvider.name.equals(registrationId))
                 .findAny()
-                .orElseThrow(() -> new OAuthException(ErrorCode.NOT_FOUND_PROVIDER));
+                .orElseThrow(() -> new OAuthException(ErrorCodeAndMessage.NOT_FOUND_OAUTH_PROVIDER));
     }
 }

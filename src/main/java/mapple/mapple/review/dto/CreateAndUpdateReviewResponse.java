@@ -3,6 +3,7 @@ package mapple.mapple.review.dto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import mapple.mapple.dto.ImageListDto;
 import mapple.mapple.entity.PublicStatus;
 import mapple.mapple.review.entity.Rating;
 
@@ -19,4 +20,5 @@ public class CreateAndUpdateReviewResponse {
     private PublicStatus publicStatus;
     private Rating rating;
     private LocalDateTime createdAt;
+    private ImageListDto imageListDto;
 }

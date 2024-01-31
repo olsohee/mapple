@@ -1,9 +1,8 @@
 package mapple.mapple.user.service;
 
 import lombok.RequiredArgsConstructor;
-import mapple.mapple.exception.CustomJwtException;
-import mapple.mapple.exception.ErrorCode;
-import mapple.mapple.exception.UserException;
+import mapple.mapple.exception.ErrorCodeAndMessage;
+import mapple.mapple.exception.customException.CustomJwtException;
 import mapple.mapple.user.entity.CustomUserDetails;
 import mapple.mapple.user.entity.User;
 import mapple.mapple.user.repository.UserRepository;
@@ -21,7 +20,7 @@ public class UserDetailManager implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
         User user = userRepository.findByIdentifier(identifier)
-                .orElseThrow(() -> new CustomJwtException(ErrorCode.INVALID_TOKEN));
+                .orElseThrow(() -> new CustomJwtException(ErrorCodeAndMessage.INVALID_TOKEN));
         return CustomUserDetails.createFromEntity(user);
     }
 }

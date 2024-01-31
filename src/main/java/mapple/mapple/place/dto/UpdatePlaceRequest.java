@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class CreatePlaceRequest {
+public class UpdatePlaceRequest {
 
     @NotBlank
     private String placeName;

@@ -1,9 +1,8 @@
 package mapple.mapple.meeting.service;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import mapple.mapple.exception.ErrorCode;
-import mapple.mapple.exception.UserException;
+import mapple.mapple.exception.ErrorCodeAndMessage;
+import mapple.mapple.exception.customException.UserException;
 import mapple.mapple.meeting.dto.CreateMeetingRequest;
 import mapple.mapple.meeting.dto.CreateMeetingResponse;
 import mapple.mapple.meeting.entity.Meeting;
@@ -29,7 +28,7 @@ public class MeetingService {
 
     public CreateMeetingResponse create(CreateMeetingRequest dto, String identifier) {
         User user = userRepository.findByIdentifier(identifier)
-                .orElseThrow(() -> new UserException(ErrorCode.NOT_FOUND_USER));
+                .orElseThrow(() -> new UserException(ErrorCodeAndMessage.NOT_FOUND_USER));
 
         Meeting meeting = Meeting.create(dto.getMeetingName());
         meetingRepository.save(meeting);
@@ -37,7 +36,7 @@ public class MeetingService {
         List<User> members = new ArrayList<>();
         for (String email : dto.getMemberEmails()) {
             User member = userRepository.findByIdentifier(email)
-                    .orElseThrow(() -> new UserException(ErrorCode.NOT_FOUND_USER));
+                    .orElseThrow(() -> new UserException(ErrorCodeAndMessage.NOT_FOUND_USER));
             UserMeeting userMeeting = UserMeeting.create(member, meeting);
             userMeetingRepository.save(userMeeting);
             members.add(member);

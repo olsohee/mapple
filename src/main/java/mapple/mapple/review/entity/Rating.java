@@ -1,8 +1,8 @@
 package mapple.mapple.review.entity;
 
 import lombok.AllArgsConstructor;
-import mapple.mapple.exception.ErrorCode;
-import mapple.mapple.exception.ReviewException;
+import mapple.mapple.exception.ErrorCodeAndMessage;
+import mapple.mapple.exception.customException.ReviewException;
 
 import java.util.Arrays;
 
@@ -22,6 +22,6 @@ public enum Rating {
         return Arrays.stream(Rating.values())
                 .filter(rating -> rating.name.equals(name))
                 .findAny()
-                .orElseThrow(() -> new ReviewException(ErrorCode.NOT_FOUND_RATING));
+                .orElseThrow(() -> new ReviewException(ErrorCodeAndMessage.INVALID_RATING));
     }
 }

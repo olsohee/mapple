@@ -22,6 +22,14 @@ public class ReviewController {
     private final ReviewService reviewService;
     private final JwtUtils jwtUtils;
 
+    @PostMapping("/review")
+    public CreateAndUpdateReviewResponse create(@Validated @RequestPart CreateAndUpdateReviewRequest dto,
+                                                @RequestPart(required = false) List<MultipartFile> files,
+                                                HttpServletRequest request) throws IOException {
+        String identifier = jwtUtils.getIdentifierFromHeader(request);
+        return reviewService.createReview(dto, files, identifier);
+    }
+
     @GetMapping("/reviews")
     public List<ReadReviewListResponse> readAll(HttpServletRequest request) {
         String identifier = jwtUtils.getIdentifierFromHeader(request);
@@ -37,14 +45,6 @@ public class ReviewController {
     @GetMapping("/review/{reviewId}")
     public ReadReviewResponse read(@PathVariable("reviewId") long reviewId) {
         return reviewService.read(reviewId);
-    }
-
-    @PostMapping("/review")
-    public CreateAndUpdateReviewResponse create(@Validated @RequestPart CreateAndUpdateReviewRequest dto,
-                                                @RequestPart(required = false) List<MultipartFile> files,
-                                                HttpServletRequest request) throws IOException {
-        String identifier = jwtUtils.getIdentifierFromHeader(request);
-        return reviewService.createReview(dto, files, identifier);
     }
 
     @PutMapping("/review/{reviewId}")

@@ -1,11 +1,12 @@
-package mapple.mapple.exception;
+package mapple.mapple.exception.customException;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import mapple.mapple.exception.ErrorCodeAndMessage;
 
 @RequiredArgsConstructor
 @Getter
 public class BusinessException extends RuntimeException {
 
-    private final ErrorCode errorCode;
+    private final ErrorCodeAndMessage responseFormat;
 }

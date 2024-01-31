@@ -1,12 +1,14 @@
 package mapple.mapple.exception;
 
 import lombok.RequiredArgsConstructor;
+import mapple.mapple.exception.customException.BusinessException;
+import mapple.mapple.exception.customException.CustomJwtException;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
@@ -16,22 +18,33 @@ public class ExceptionController {
     private final MessageSource messageSource;
 
     @ExceptionHandler
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleBusinessException(BusinessException e) {
-        return new ErrorResponse(e.getErrorCode().getHttpStatus(), e.getErrorCode().getMessage());
+    public ResponseEntity handleBusinessException(BusinessException e) {
+        ErrorCodeAndMessage responseFormat = e.getResponseFormat();
+        ErrorCode errorCode = e.getResponseFormat().getErrorCode();
+        ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), responseFormat.getMessage());
+        return ResponseEntity
+                .status(errorCode.getHttpStatus())
+                .body(errorResponse);
     }
 
     @ExceptionHandler
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidationException(MethodArgumentNotValidException e) {
+    public ResponseEntity handleValidationException(MethodArgumentNotValidException e) {
         FieldError fieldError = e.getBindingResult().getFieldErrors().get(0);
         String message = messageSource.getMessage(fieldError.getCode(), new Object[]{fieldError.getField()}, null, null);
-        return new ErrorResponse(HttpStatus.BAD_REQUEST, message);
+
+        ErrorResponse errorResponse = new ErrorResponse(ErrorCode.CODE_001.getCode(), message);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(errorResponse);
     }
 
     @ExceptionHandler
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleJwtException(CustomJwtException e) {
-        return new ErrorResponse(e.getErrorCode().getHttpStatus(), e.getErrorCode().getMessage());
+    public ResponseEntity handleJwtException(CustomJwtException e) {
+        ErrorCodeAndMessage responseFormat = e.getResponseFormat();
+        ErrorCode errorCode = e.getResponseFormat().getErrorCode();
+        ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), responseFormat.getMessage());
+        return ResponseEntity
+                .status(errorCode.getHttpStatus())
+                .body(errorResponse);
     }
 }

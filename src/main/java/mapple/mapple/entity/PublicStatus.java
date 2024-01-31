@@ -1,8 +1,8 @@
 package mapple.mapple.entity;
 
 import lombok.AllArgsConstructor;
-import mapple.mapple.exception.ErrorCode;
-import mapple.mapple.exception.ReviewException;
+import mapple.mapple.exception.ErrorCodeAndMessage;
+import mapple.mapple.exception.customException.ReviewException;
 
 import java.util.Arrays;
 
@@ -19,6 +19,6 @@ public enum PublicStatus {
         return Arrays.stream(PublicStatus.values())
                 .filter(status -> status.name.equals(name))
                 .findAny()
-                .orElseThrow(() -> new ReviewException(ErrorCode.NOT_FOUND_PUBLIC_STATUS));
+                .orElseThrow(() -> new ReviewException(ErrorCodeAndMessage.INVALID_PUBLIC_STATUS));
     }
 }
