@@ -45,10 +45,8 @@ public class ReviewService {
     @Value("${file.dir.review_image}")
     private String reviewImageFileDir;
 
-    public CreateAndUpdateReviewResponse create(CreateAndUpdateReviewRequest dto, List<MultipartFile> files, String email) throws IOException {
-        User user = userRepository.findByIdentifier(email)
-                .orElseThrow(() -> new UserException(ErrorCodeAndMessage.NOT_FOUND_USER));
-
+    public CreateAndUpdateReviewResponse create(CreateAndUpdateReviewRequest dto, List<MultipartFile> files, String identifier) throws IOException {
+        User user = findUserByIdentifier(identifier);
         Review review = Review.create(dto.getPlaceName(), dto.getContent(), dto.getUrl(),
                 PublicStatus.find(dto.getPublicStatus()), Rating.find(dto.getRating()), user);
 

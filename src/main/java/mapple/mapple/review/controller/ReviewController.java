@@ -72,8 +72,11 @@ public class ReviewController {
     }
 
     @DeleteMapping("/review/{reviewId}")
-    public void delete(@PathVariable("reviewId") long reviewId, HttpServletRequest request) {
+    public ResponseEntity delete(@PathVariable("reviewId") long reviewId, HttpServletRequest request) {
         String identifier = jwtUtils.getIdentifierFromHeader(request);
         reviewService.delete(reviewId, identifier);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new SuccessResponse("리뷰 삭제 성공"));
+
     }
 }
