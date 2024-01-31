@@ -7,10 +7,11 @@ import mapple.mapple.place.dto.CreatePlaceRequest;
 import mapple.mapple.place.dto.CreatePlaceResponse;
 import mapple.mapple.place.service.PlaceService;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,9 +21,10 @@ public class PlaceController {
     private final JwtUtils jwtUtils;
 
     @PostMapping("/place")
-    public CreatePlaceResponse createPlace(@Validated @RequestBody CreatePlaceRequest dto,
-                                           HttpServletRequest request) {
+    public CreatePlaceResponse createPlace(@Validated @RequestPart CreatePlaceRequest dto,
+                                           @RequestPart List<MultipartFile> files,
+                                           HttpServletRequest request) throws IOException {
         String identifier = jwtUtils.getIdentifierFromHeader(request);
-        return placeService.create(dto, identifier);
+        return placeService.create(dto, files, identifier);
     }
 }

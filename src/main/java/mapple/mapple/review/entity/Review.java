@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import mapple.mapple.entity.BaseEntity;
+import mapple.mapple.entity.Image;
 import mapple.mapple.entity.PublicStatus;
 import mapple.mapple.friend.entity.Friend;
 import mapple.mapple.user.entity.User;
@@ -47,7 +48,7 @@ public class Review extends BaseEntity {
     private User user;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    List<Image> images = new ArrayList<>();
+    List<ReviewImage> images = new ArrayList<>();
 
     public static Review create(String placeName, String content, String url,
                                 PublicStatus publicStatus, Rating rating, User user) {
@@ -63,7 +64,7 @@ public class Review extends BaseEntity {
     }
 
     // 연관관계 편의 메소드
-    public void addImage(Image image) {
+    public void addImage(ReviewImage image) {
         if (image.getReview() != null) {
             image.getReview().getImages().remove(image);
         }
@@ -80,19 +81,15 @@ public class Review extends BaseEntity {
     }
 
     public void updateImages(List<MultipartFile> files, String reviewImageFileDir) throws IOException {
-        List<Image> images = new ArrayList<>();
+        this.images.clear();
+
         for (MultipartFile file : files) {
             String updatedName = file.getOriginalFilename();
             String storedName = getStoredName(updatedName);
             file.transferTo(new File(reviewImageFileDir + storedName));
 
             Image image = Image.create(storedName, updatedName, reviewImageFileDir);
-            images.add(image);
-        }
-
-        this.images.clear();
-        for (Image image : images) {
-            this.images.add(image);
+            ReviewImage.create(image, this);
         }
     }
 
