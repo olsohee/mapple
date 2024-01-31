@@ -15,6 +15,6 @@ public class ReadReviewListResponse {
     private String username;
     private String placeName;
     private Rating rating;
-    private LocalDateTime updatedAt;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

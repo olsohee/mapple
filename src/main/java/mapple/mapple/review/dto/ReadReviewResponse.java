@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import mapple.mapple.review.entity.Rating;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,4 +20,5 @@ public class ReadReviewResponse {
     private Rating rating;
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
+    private List<byte[]> images;
 }

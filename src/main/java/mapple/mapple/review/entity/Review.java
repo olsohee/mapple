@@ -120,4 +120,12 @@ public class Review extends BaseEntity {
     public boolean isPrivate() {
         return publicStatus == PublicStatus.PRIVATE;
     }
+
+    public boolean isOwn(User user) {
+        return this.user == user;
+    }
+
+    public boolean isOnlyFriend() {
+        return publicStatus == PublicStatus.ONLY_FRIEND;
+    }
 }

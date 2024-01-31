@@ -1,4 +1,4 @@
-package mapple.mapple.exception;
+package mapple.mapple;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,9 +1,9 @@
 package mapple.mapple.review.service;
 
 import lombok.RequiredArgsConstructor;
-import mapple.mapple.dto.ImageListDto;
 import mapple.mapple.entity.Image;
 import mapple.mapple.exception.ErrorCodeAndMessage;
+import mapple.mapple.exception.customException.BusinessException;
 import mapple.mapple.exception.customException.ReviewException;
 import mapple.mapple.friend.entity.Friend;
 import mapple.mapple.friend.repository.FriendQueryRepository;
@@ -22,9 +22,14 @@ import mapple.mapple.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,44 +45,7 @@ public class ReviewService {
     @Value("${file.dir.review_image}")
     private String reviewImageFileDir;
 
-    public List<ReadReviewListResponse> readAll(String identifier) {
-        User user = userRepository.findByIdentifier(identifier)
-                .orElseThrow(() -> new UserException(ErrorCodeAndMessage.NOT_FOUND_USER));
-        List<Friend> friends = friendQueryRepository.findFriendsByUser(user);
-
-        // 전체 공개 + 친구이면 친구 공개인 리뷰
-        List<Review> reviews = reviewRepository.findAll().stream()
-                .filter(review -> review.isPublic() || review.canRead(friends))
-                .toList();
-
-        return reviews.stream()
-                .map(review -> new ReadReviewListResponse(review.getUser().getUsername(), review.getPlaceName(),
-                        review.getRating(), review.getUpdatedAt(), review.getCreatedAt()))
-                .toList();
-    }
-
-    public List<ReadReviewListResponse> readFriendsReviews(String identifier) {
-        User user = userRepository.findByIdentifier(identifier)
-                .orElseThrow(() -> new UserException(ErrorCodeAndMessage.NOT_FOUND_USER));
-
-        List<Friend> friends = friendQueryRepository.findFriendsByUser(user);
-
-        List<Review> friendsReviews = reviewRepository.findAll().stream()
-                .filter(review -> review.checkIsFriendsReview(friends) && !review.isPrivate())
-                .toList();
-        return friendsReviews.stream()
-                .map(review -> new ReadReviewListResponse(review.getUser().getUsername(), review.getPlaceName(),
-                        review.getRating(), review.getUpdatedAt(), review.getCreatedAt()))
-                .toList();
-    }
-
-    public ReadReviewResponse read(long reviewId) {
-        Review review = findReviewById(reviewId);
-        return new ReadReviewResponse(review.getUser().getUsername(), review.getPlaceName(), review.getContent(),
-                review.getUrl(), review.getRating(), review.getCreatedAt(), review.getUpdatedAt());
-    }
-
-    public CreateAndUpdateReviewResponse createReview(CreateAndUpdateReviewRequest dto, List<MultipartFile> files, String email) throws IOException {
+    public CreateAndUpdateReviewResponse create(CreateAndUpdateReviewRequest dto, List<MultipartFile> files, String email) throws IOException {
         User user = userRepository.findByIdentifier(email)
                 .orElseThrow(() -> new UserException(ErrorCodeAndMessage.NOT_FOUND_USER));
 
@@ -90,14 +58,87 @@ public class ReviewService {
 
         reviewRepository.save(review);
 
-        List<ImageListDto.ImageDto> imageDtos = new ArrayList<>();
+        // dto 생성
+        List<byte[]> imageByteList = new ArrayList<>();
         for (ReviewImage reviewImage : review.getImages()) {
             Image image = reviewImage.getImage();
-            ImageListDto.ImageDto imageDto = new ImageListDto.ImageDto(image.getStoredName(), image.getUpdatedName(), image.getStoreDir());
-            imageDtos.add(imageDto);
+            Path path = Paths.get(image.getStoreDir() + image.getStoredName());
+            if (Files.probeContentType(path) != null) {
+                File file = new File(image.getStoreDir() + image.getStoredName());
+                byte[] imageByte = FileCopyUtils.copyToByteArray(file);
+                imageByteList.add(imageByte);
+            }
         }
-        return new CreateAndUpdateReviewResponse(review.getPlaceName(), review.getContent(), review.getUrl(),
-                review.getPublicStatus(), review.getRating(), review.getCreatedAt(), new ImageListDto(imageDtos, imageDtos.size()));
+
+        return new CreateAndUpdateReviewResponse(user.getUsername(), review.getPlaceName(), review.getContent(), review.getUrl(),
+                review.getPublicStatus(), review.getRating(), review.getCreatedAt(), review.getUpdatedAt(), imageByteList);
+    }
+
+    public List<ReadReviewListResponse> readReadableAllReviews(String identifier) {
+        User user = findUserByIdentifier(identifier);
+        List<Friend> friends = friendQueryRepository.findFriendsByUser(user);
+
+        // 자신의 리뷰 + 전체 공개 + 친구이면 친구 공개인 리뷰
+        List<Review> reviews = reviewRepository.findAll().stream()
+                .filter(review -> review.isPublic() || review.canRead(friends) || review.isOwn(user))
+                .toList();
+
+        return reviews.stream()
+                .map(review -> new ReadReviewListResponse(review.getUser().getUsername(), review.getPlaceName(),
+                        review.getRating(), review.getCreatedAt(), review.getUpdatedAt()))
+                .toList();
+    }
+
+    public List<ReadReviewListResponse> readFriendsReviews(String identifier) {
+        User user = findUserByIdentifier(identifier);
+        List<Friend> friends = friendQueryRepository.findFriendsByUser(user);
+
+        List<Review> friendsReviews = reviewRepository.findAll().stream()
+                .filter(review -> review.checkIsFriendsReview(friends) && !review.isPrivate())
+                .toList();
+        return friendsReviews.stream()
+                .map(review -> new ReadReviewListResponse(review.getUser().getUsername(), review.getPlaceName(),
+                        review.getRating(), review.getCreatedAt(), review.getUpdatedAt()))
+                .toList();
+    }
+
+    public ReadReviewResponse readOne(long reviewId, String identifier) throws IOException {
+        Review review = findReviewById(reviewId);
+        User user = findUserByIdentifier(identifier);
+        validateReadAuthorization(review, user);
+
+        // dto 생성
+        List<byte[]> imageByteList = new ArrayList<>();
+        for (ReviewImage reviewImage : review.getImages()) {
+            Image image = reviewImage.getImage();
+            Path path = Paths.get(image.getStoreDir() + image.getStoredName());
+            if (Files.probeContentType(path) != null) {
+                File file = new File(image.getStoreDir() + image.getStoredName());
+                byte[] imageByte = FileCopyUtils.copyToByteArray(file);
+                imageByteList.add(imageByte);
+            }
+        }
+        return new ReadReviewResponse(review.getUser().getUsername(), review.getPlaceName(), review.getContent(),
+                review.getUrl(), review.getRating(), review.getCreatedAt(), review.getUpdatedAt(), imageByteList);
+    }
+
+    private void validateReadAuthorization(Review review, User user) {
+        if (review.getUser().equals(user)) {
+            return;
+        }
+        if (review.isPrivate()) {
+            throw new BusinessException(ErrorCodeAndMessage.FORBIDDEN);
+        } else if (review.isOnlyFriend()) {
+            if (!isFriend(review.getUser(), user)) {
+                throw new BusinessException(ErrorCodeAndMessage.FORBIDDEN);
+            }
+        }
+    }
+
+    private boolean isFriend(User reviewUser, User readUser) {
+        List<Friend> friends = friendQueryRepository.findFriendsByUser(reviewUser);
+        return friends.stream()
+                .anyMatch(friend -> friend.getToUser().equals(readUser));
     }
 
     public List<ReadReviewListResponse> readAllByUserIdentifier(String identifier) {
@@ -106,13 +147,14 @@ public class ReviewService {
         List<Review> reviews = reviewRepository.findByUserId(user.getId());
         return reviews.stream()
                 .map(review -> new ReadReviewListResponse(review.getUser().getUsername(), review.getPlaceName(),
-                        review.getRating(), review.getUpdatedAt(), review.getCreatedAt()))
+                        review.getRating(), review.getCreatedAt(), review.getUpdatedAt()))
                 .toList();
     }
 
     public CreateAndUpdateReviewResponse updateReview(long reviewId, String identifier, CreateAndUpdateReviewRequest dto, List<MultipartFile> files) throws IOException {
         Review review = findReviewById(reviewId);
-        validateAuthorization(review, identifier);
+        User user = findUserByIdentifier(identifier);
+        validateOwner(review, user);
 
         review.update(dto.getPlaceName(), dto.getContent(), Rating.find(dto.getRating()),
                 PublicStatus.find(dto.getPublicStatus()), dto.getUrl());
@@ -123,20 +165,32 @@ public class ReviewService {
             review.updateImages(files, reviewImageFileDir);
         }
 
-        List<ImageListDto.ImageDto> imageDtos = new ArrayList<>();
+        // dto 생성
+        List<byte[]> imageByteList = new ArrayList<>();
         for (ReviewImage reviewImage : review.getImages()) {
             Image image = reviewImage.getImage();
-            ImageListDto.ImageDto imageDto = new ImageListDto.ImageDto(image.getStoredName(), image.getUpdatedName(), image.getStoreDir());
-            imageDtos.add(imageDto);
+            Path path = Paths.get(image.getStoreDir() + image.getStoredName());
+            if (Files.probeContentType(path) != null) {
+                File file = new File(image.getStoreDir() + image.getStoredName());
+                byte[] imageByte = FileCopyUtils.copyToByteArray(file);
+                imageByteList.add(imageByte);
+            }
         }
-        return new CreateAndUpdateReviewResponse(review.getPlaceName(), review.getContent(), review.getUrl(),
-                review.getPublicStatus(), review.getRating(), review.getCreatedAt(), new ImageListDto(imageDtos, imageDtos.size()));
+
+        return new CreateAndUpdateReviewResponse(user.getUsername(), review.getPlaceName(), review.getContent(), review.getUrl(),
+                review.getPublicStatus(), review.getRating(), review.getCreatedAt(), review.getUpdatedAt(), imageByteList);
     }
 
     public void delete(long reviewId, String identifier) {
         Review review = findReviewById(reviewId);
-        validateAuthorization(review, identifier);
+        User user = findUserByIdentifier(identifier);
+        validateOwner(review, user);
         reviewRepository.delete(review);
+    }
+
+    private User findUserByIdentifier(String identifier) {
+        return userRepository.findByIdentifier(identifier)
+                .orElseThrow(() -> new UserException(ErrorCodeAndMessage.NOT_FOUND_USER));
     }
 
     private Review findReviewById(long reviewId) {
@@ -144,8 +198,8 @@ public class ReviewService {
                 .orElseThrow(() -> new ReviewException(ErrorCodeAndMessage.NOT_FOUND_REVIEW));
     }
 
-    private void validateAuthorization(Review review, String identifier) {
-        if (!review.getUser().getIdentifier().equals(identifier)) {
+    private void validateOwner(Review review, User user) {
+        if (!review.getUser().equals(user)) {
             throw new UserException(ErrorCodeAndMessage.FORBIDDEN);
         }
     }
