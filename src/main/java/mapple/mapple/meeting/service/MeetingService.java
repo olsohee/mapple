@@ -33,21 +33,21 @@ public class MeetingService {
         Meeting meeting = Meeting.create(dto.getMeetingName());
         meetingRepository.save(meeting);
 
-        List<User> members = new ArrayList<>();
-        for (String email : dto.getMemberEmails()) {
-            User member = userRepository.findByIdentifier(email)
+        List<User> users = new ArrayList<>();
+        for (String email : dto.getUserEmails()) {
+            User addUser = userRepository.findByIdentifier(email)
                     .orElseThrow(() -> new UserException(ErrorCodeAndMessage.NOT_FOUND_USER));
-            UserMeeting userMeeting = UserMeeting.create(member, meeting);
+            UserMeeting userMeeting = UserMeeting.create(addUser, meeting);
             userMeetingRepository.save(userMeeting);
-            members.add(member);
+            users.add(addUser);
         }
         UserMeeting userMeeting = UserMeeting.create(user, meeting);
         userMeetingRepository.save(userMeeting);
-        members.add(user);
+        users.add(user);
 
-        List<String> memberNames = members.stream()
+        List<String> userNames = users.stream()
                 .map(member -> member.getUsername())
                 .toList();
-        return new CreateMeetingResponse(meeting.getMeetingName(), memberNames);
+        return new CreateMeetingResponse(meeting.getMeetingName(), userNames);
     }
 }

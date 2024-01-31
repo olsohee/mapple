@@ -1,5 +1,6 @@
 package mapple.mapple.meeting.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -9,6 +10,9 @@ import java.util.List;
 @Getter
 public class CreateMeetingRequest {
 
+    @NotBlank
     private String meetingName;
-    private List<String> memberEmails;
+
+    @NotBlank
+    private List<String> userEmails;
 }

@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import mapple.mapple.exception.ErrorCodeAndMessage;
 import mapple.mapple.exception.customException.FriendException;
 import mapple.mapple.exception.customException.UserException;
-import mapple.mapple.friend.dto.ReadFriendResponse;
+import mapple.mapple.friend.dto.FriendRequestsResponse;
 import mapple.mapple.friend.entity.Friend;
 import mapple.mapple.friend.repository.FriendRepository;
 import mapple.mapple.user.entity.User;
@@ -20,7 +20,7 @@ public class FriendService {
     private final UserRepository userRepository;
     private final FriendRepository friendRepository;
 
-    public ReadFriendResponse request(String identifier, long userId) {
+    public FriendRequestsResponse request(String identifier, long userId) {
         User fromUser = userRepository.findByIdentifier(identifier)
                 .orElseThrow(() -> new UserException(ErrorCodeAndMessage.NOT_FOUND_USER));
         if (fromUser.getId() == userId) {
@@ -30,17 +30,17 @@ public class FriendService {
                 .orElseThrow(() -> new UserException(ErrorCodeAndMessage.NOT_FOUND_USER));
         Friend friend = Friend.create(fromUser, toUser);
         friendRepository.save(friend);
-        return new ReadFriendResponse(friend.getFromUser().getUsername(), friend.getToUser().getUsername(), friend.getRequestStatus());
+        return new FriendRequestsResponse(friend.getFromUser().getUsername(), friend.getToUser().getUsername(), friend.getRequestStatus());
     }
 
-    public ReadFriendResponse accept(String identifier, long friendId) {
+    public FriendRequestsResponse accept(String identifier, long friendId) {
         Friend friend = friendRepository.findById(friendId)
                 .orElseThrow(() -> new FriendException(ErrorCodeAndMessage.NOT_FOUND_FRIEND));
         validateAuthorization(identifier, friend);
         friend.acceptRequest();
         Friend reverseFriend = Friend.createReverse(friend.getFromUser(), friend.getToUser());
         friendRepository.save(reverseFriend);
-        return new ReadFriendResponse(friend.getFromUser().getUsername(), friend.getToUser().getUsername(), friend.getRequestStatus());
+        return new FriendRequestsResponse(friend.getFromUser().getUsername(), friend.getToUser().getUsername(), friend.getRequestStatus());
     }
 
     public void refuse(String identifier, long friendId) {

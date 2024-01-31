@@ -12,5 +12,5 @@ import java.util.List;
 public class CreateMeetingResponse {
 
     private String meetingName;
-    private List<String> memberNames;
+    private List<String> userNames;
 }

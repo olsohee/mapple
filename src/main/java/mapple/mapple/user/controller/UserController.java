@@ -3,6 +3,7 @@ package mapple.mapple.user.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import mapple.mapple.SuccessResponse;
 import mapple.mapple.jwt.JwtDto;
 import mapple.mapple.user.dto.JoinRequest;
 import mapple.mapple.user.dto.JoinResponse;
@@ -24,14 +25,14 @@ public class UserController {
     public ResponseEntity join(@Validated @RequestBody JoinRequest dto) {
         JoinResponse responseData = userService.join(dto);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(responseData);
+                .body(new SuccessResponse("회원가입 성공", responseData));
     }
 
     @PostMapping("/login")
     public ResponseEntity login(@Validated @RequestBody LoginRequest dto) {
         JwtDto responseData = userService.login(dto);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(responseData);
+                .body(new SuccessResponse("로그인 성공", responseData));
     }
 
     @GetMapping("/login/oauth")
@@ -39,7 +40,7 @@ public class UserController {
                              @RequestParam("refresh_token") String refreshToken) {
         JwtDto responseData = new JwtDto(accessToken, refreshToken);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(responseData);
+                .body(new SuccessResponse("OAuth 로그인 성공", responseData));
     }
 
     /**
@@ -49,6 +50,6 @@ public class UserController {
     public ResponseEntity renewToken(HttpServletRequest request) {
         JwtDto responseData = userService.renewToken(request);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(responseData);
+                .body(new SuccessResponse("토큰 재발급 성공", responseData));
     }
 }
