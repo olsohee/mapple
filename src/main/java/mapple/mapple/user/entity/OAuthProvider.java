@@ -9,7 +9,7 @@ import java.util.Arrays;
 @AllArgsConstructor
 public enum OAuthProvider {
 
-    NONE(""),
+    NONE("none"),
     KAKAO("kakao"),
     NAVER("naver");
 
