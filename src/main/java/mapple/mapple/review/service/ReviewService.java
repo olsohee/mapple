@@ -19,6 +19,7 @@ import mapple.mapple.review.entity.ReviewImage;
 import mapple.mapple.review.repository.ReviewRepository;
 import mapple.mapple.user.entity.User;
 import mapple.mapple.user.repository.UserRepository;
+import mapple.mapple.validator.ReviewValidator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +42,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final FriendQueryRepository friendQueryRepository;
+    private final ReviewValidator reviewValidator;
 
     @Value("${file.dir.review_image}")
     private String reviewImageFileDir;
@@ -152,7 +154,7 @@ public class ReviewService {
     public CreateAndUpdateReviewResponse updateReview(long reviewId, String identifier, CreateAndUpdateReviewRequest dto, List<MultipartFile> files) throws IOException {
         Review review = findReviewById(reviewId);
         User user = findUserByIdentifier(identifier);
-        validateOwner(review, user);
+        reviewValidator.validateReviewAuthorization(review, user);
 
         review.update(dto.getPlaceName(), dto.getContent(), Rating.find(dto.getRating()),
                 PublicStatus.find(dto.getPublicStatus()), dto.getUrl());
@@ -182,7 +184,7 @@ public class ReviewService {
     public void delete(long reviewId, String identifier) {
         Review review = findReviewById(reviewId);
         User user = findUserByIdentifier(identifier);
-        validateOwner(review, user);
+        reviewValidator.validateReviewAuthorization(review, user);
         reviewRepository.delete(review);
     }
 
@@ -194,11 +196,5 @@ public class ReviewService {
     private Review findReviewById(long reviewId) {
         return reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ReviewException(ErrorCodeAndMessage.NOT_FOUND_REVIEW));
-    }
-
-    private void validateOwner(Review review, User user) {
-        if (!review.getUser().equals(user)) {
-            throw new UserException(ErrorCodeAndMessage.FORBIDDEN);
-        }
     }
 }

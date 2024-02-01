@@ -3,7 +3,6 @@ package mapple.mapple.place.service;
 import lombok.RequiredArgsConstructor;
 import mapple.mapple.entity.Image;
 import mapple.mapple.exception.*;
-import mapple.mapple.exception.customException.BusinessException;
 import mapple.mapple.exception.customException.MeetingException;
 import mapple.mapple.exception.customException.PlaceException;
 import mapple.mapple.exception.customException.UserException;
@@ -18,6 +17,8 @@ import mapple.mapple.place.entity.PlaceImage;
 import mapple.mapple.place.repository.PlaceRepository;
 import mapple.mapple.user.entity.User;
 import mapple.mapple.user.repository.UserRepository;
+import mapple.mapple.validator.MeetingValidator;
+import mapple.mapple.validator.PlaceValidator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +41,8 @@ public class PlaceService {
     private final PlaceRepository placeRepository;
     private final MeetingRepository meetingRepository;
     private final UserRepository userRepository;
+    private final MeetingValidator meetingValidator;
+    private final PlaceValidator placeValidator;
 
     @Value("${file.dir.place_image}")
     private String placeImageFileDir;
@@ -48,7 +51,7 @@ public class PlaceService {
         User user = findUserByIdentifier(identifier);
         Meeting meeting = findMeetingById(meetingId);
 
-        validateMeetingMember(user, meeting);
+        meetingValidator.validateMeetingMember(meeting, user);
 
         Place place = Place.create(meeting, user, dto.getPlaceName(), dto.getContent(), dto.getUrl());
         if (files != null) {
@@ -77,7 +80,7 @@ public class PlaceService {
     public List<ReadPlaceListResponse> readAll(long meetingId, String identifier) {
         User user = findUserByIdentifier(identifier);
         Meeting meeting = findMeetingById(meetingId);
-        validateMeetingMember(user, meeting);
+        meetingValidator.validateMeetingMember(meeting, user);
 
         return placeRepository.findAll().stream()
                 .filter(place -> place.getMeeting().equals(meeting))
@@ -89,7 +92,7 @@ public class PlaceService {
     public ReadPlaceResponse readOne(long meetingId, long placeId, String identifier) throws IOException {
         User user = findUserByIdentifier(identifier);
         Meeting meeting = findMeetingById(meetingId);
-        validateMeetingMember(user, meeting);
+        meetingValidator.validateMeetingMember(meeting, user);
 
         Place place = findPlaceById(placeId);
 
@@ -114,7 +117,7 @@ public class PlaceService {
         Place place = findPlaceById(placeId);
         Meeting meeting = findMeetingById(meetingId);
 
-        validateUpdateAndDeleteAuthorization(user, place);
+        placeValidator.validatePlaceAuthorization(user, place);
 
         place.update(dto.getPlaceName(), dto.getContent(), dto.getUrl());
         if (files != null) {
@@ -141,22 +144,8 @@ public class PlaceService {
     public void delete(long placeId, String identifier) {
         User user = findUserByIdentifier(identifier);
         Place place = findPlaceById(placeId);
-        validateUpdateAndDeleteAuthorization(user, place);
+        placeValidator.validatePlaceAuthorization(user, place);
         placeRepository.delete(place);
-    }
-
-    private void validateMeetingMember(User user, Meeting meeting) {
-        boolean hasAuthority = meeting.getUserMeetings().stream()
-                .anyMatch(userMeeting -> userMeeting.getUser() == user);
-        if (!hasAuthority) {
-            throw new BusinessException(ErrorCodeAndMessage.FORBIDDEN);
-        }
-    }
-
-    private void validateUpdateAndDeleteAuthorization(User user, Place place) {
-        if (!place.getUser().equals(user)) {
-            throw new BusinessException(ErrorCodeAndMessage.FORBIDDEN);
-        }
     }
 
     private User findUserByIdentifier(String identifier) {
