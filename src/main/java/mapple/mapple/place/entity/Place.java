@@ -6,6 +6,7 @@ import mapple.mapple.entity.BaseEntity;
 import mapple.mapple.entity.PublicStatus;
 import mapple.mapple.meeting.entity.Meeting;
 import mapple.mapple.entity.Image;
+import mapple.mapple.user.entity.User;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -30,12 +31,13 @@ public class Place extends BaseEntity {
 
     private String url;
 
-    @Column(nullable = false)
-    private PublicStatus publicStatus;
-
     @ManyToOne
     @JoinColumn(name = "group_id")
     private Meeting meeting;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     List<PlaceImage> images = new ArrayList<>();
@@ -49,14 +51,13 @@ public class Place extends BaseEntity {
         this.images.add(image);
     }
 
-    public static Place create(Meeting meeting, String placeName, String content,
-                              String url, PublicStatus publicStatus) {
+    public static Place create(Meeting meeting, User user, String placeName, String content, String url) {
         Place place = new Place();
         place.meeting = meeting;
+        place.user = user;
         place.placeName = placeName;
         place.content = content;
         place.url = url;
-        place.publicStatus = publicStatus;
         return place;
     }
 

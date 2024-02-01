@@ -15,7 +15,4 @@ public class CreatePlaceRequest {
     private String content;
 
     private String url;
-
-    @NotBlank
-    private String publicStatus;
 }

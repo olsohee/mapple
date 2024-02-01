@@ -34,16 +34,17 @@ public class MeetingService {
         meetingRepository.save(meeting);
 
         List<User> users = new ArrayList<>();
-        for (String email : dto.getUserEmails()) {
-            User addUser = userRepository.findByIdentifier(email)
-                    .orElseThrow(() -> new UserException(ErrorCodeAndMessage.NOT_FOUND_USER));
-            UserMeeting userMeeting = UserMeeting.create(addUser, meeting);
-            userMeetingRepository.save(userMeeting);
-            users.add(addUser);
-        }
-        UserMeeting userMeeting = UserMeeting.create(user, meeting);
-        userMeetingRepository.save(userMeeting);
         users.add(user);
+        userMeetingRepository.save(UserMeeting.create(user, meeting));
+        if (dto.getUserEmails() != null) {
+            for (String email : dto.getUserEmails()) {
+                User addUser = userRepository.findByIdentifier(email)
+                        .orElseThrow(() -> new UserException(ErrorCodeAndMessage.NOT_FOUND_USER));
+                UserMeeting userMeeting = UserMeeting.create(addUser, meeting);
+                userMeetingRepository.save(userMeeting);
+                users.add(addUser);
+            }
+        }
 
         List<String> userNames = users.stream()
                 .map(member -> member.getUsername())
