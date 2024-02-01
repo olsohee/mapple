@@ -11,6 +11,8 @@ import mapple.mapple.meeting.entity.Meeting;
 import mapple.mapple.meeting.repository.MeetingRepository;
 import mapple.mapple.place.dto.CreateAndUpdatePlaceRequest;
 import mapple.mapple.place.dto.CreateAndUpdatePlaceResponse;
+import mapple.mapple.place.dto.ReadPlaceListResponse;
+import mapple.mapple.place.dto.ReadPlaceResponse;
 import mapple.mapple.place.entity.Place;
 import mapple.mapple.place.entity.PlaceImage;
 import mapple.mapple.place.repository.PlaceRepository;
@@ -46,7 +48,7 @@ public class PlaceService {
         User user = findUserByIdentifier(identifier);
         Meeting meeting = findMeetingById(meetingId);
 
-        validateCreateAuthorization(user, meeting);
+        validateMeetingMember(user, meeting);
 
         Place place = Place.create(meeting, user, dto.getPlaceName(), dto.getContent(), dto.getUrl());
         if (files != null) {
@@ -72,12 +74,38 @@ public class PlaceService {
                 imageByteList);
     }
 
-    private void validateCreateAuthorization(User user, Meeting meeting) {
-        boolean hasAuthority = meeting.getUserMeetings().stream()
-                .anyMatch(userMeeting -> userMeeting.getUser() == user);
-        if (!hasAuthority) {
-            throw new BusinessException(ErrorCodeAndMessage.FORBIDDEN);
+    public List<ReadPlaceListResponse> readAll(long meetingId, String identifier) {
+        User user = findUserByIdentifier(identifier);
+        Meeting meeting = findMeetingById(meetingId);
+        validateMeetingMember(user, meeting);
+
+        return placeRepository.findAll().stream()
+                .filter(place -> place.getMeeting().equals(meeting))
+                .map(place -> new ReadPlaceListResponse(place.getUser().getUsername(), place.getPlaceName(),
+                        place.getCreatedAt(), place.getUpdatedAt()))
+                .toList();
+    }
+
+    public ReadPlaceResponse readOne(long meetingId, long placeId, String identifier) throws IOException {
+        User user = findUserByIdentifier(identifier);
+        Meeting meeting = findMeetingById(meetingId);
+        validateMeetingMember(user, meeting);
+
+        Place place = findPlaceById(placeId);
+
+        // dto 생성
+        List<byte[]> imageByteList = new ArrayList<>();
+        for (PlaceImage placeImage : place.getImages()) {
+            Image image = placeImage.getImage();
+            Path path = Paths.get(image.getStoreDir() + image.getStoredName());
+            if (Files.probeContentType(path) != null) {
+                File file = new File(image.getStoreDir() + image.getStoredName());
+                byte[] imageByte = FileCopyUtils.copyToByteArray(file);
+                imageByteList.add(imageByte);
+            }
         }
+        return new ReadPlaceResponse(user.getUsername(), place.getPlaceName(), place.getContent(),
+                place.getUrl(), place.getCreatedAt(), place.getUpdatedAt(), imageByteList);
     }
 
     public CreateAndUpdatePlaceResponse update(CreateAndUpdatePlaceRequest dto, List<MultipartFile> files,
@@ -115,6 +143,14 @@ public class PlaceService {
         Place place = findPlaceById(placeId);
         validateUpdateAndDeleteAuthorization(user, place);
         placeRepository.delete(place);
+    }
+
+    private void validateMeetingMember(User user, Meeting meeting) {
+        boolean hasAuthority = meeting.getUserMeetings().stream()
+                .anyMatch(userMeeting -> userMeeting.getUser() == user);
+        if (!hasAuthority) {
+            throw new BusinessException(ErrorCodeAndMessage.FORBIDDEN);
+        }
     }
 
     private void validateUpdateAndDeleteAuthorization(User user, Place place) {
