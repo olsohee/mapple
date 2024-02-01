@@ -86,7 +86,7 @@ public class PlaceService {
         Place place = findPlaceById(placeId);
         Meeting meeting = findMeetingById(meetingId);
 
-        validateUpdateAuthorization(user, place);
+        validateUpdateAndDeleteAuthorization(user, place);
 
         place.update(dto.getPlaceName(), dto.getContent(), dto.getUrl());
         if (files != null) {
@@ -110,7 +110,14 @@ public class PlaceService {
                 imageByteList);
     }
 
-    private void validateUpdateAuthorization(User user, Place place) {
+    public void delete(long placeId, String identifier) {
+        User user = findUserByIdentifier(identifier);
+        Place place = findPlaceById(placeId);
+        validateUpdateAndDeleteAuthorization(user, place);
+        placeRepository.delete(place);
+    }
+
+    private void validateUpdateAndDeleteAuthorization(User user, Place place) {
         if (!place.getUser().equals(user)) {
             throw new BusinessException(ErrorCodeAndMessage.FORBIDDEN);
         }
