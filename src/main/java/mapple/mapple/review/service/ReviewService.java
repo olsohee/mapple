@@ -3,7 +3,6 @@ package mapple.mapple.review.service;
 import lombok.RequiredArgsConstructor;
 import mapple.mapple.entity.Image;
 import mapple.mapple.exception.ErrorCodeAndMessage;
-import mapple.mapple.exception.customException.BusinessException;
 import mapple.mapple.exception.customException.ReviewException;
 import mapple.mapple.friend.entity.Friend;
 import mapple.mapple.friend.repository.FriendQueryRepository;
@@ -105,7 +104,12 @@ public class ReviewService {
     public ReadReviewResponse readOne(long reviewId, String identifier) throws IOException {
         Review review = findReviewById(reviewId);
         User user = findUserByIdentifier(identifier);
-        validateReadAuthorization(review, user);
+
+        reviewValidator.validateReviewAuthorization(review, user);
+        reviewValidator.validateIsNotPrivateReview(review);
+        if (review.isOnlyFriend()) {
+            reviewValidator.validateFriend(review.getUser(), user);
+        }
 
         // dto 생성
         List<byte[]> imageByteList = new ArrayList<>();
@@ -120,25 +124,6 @@ public class ReviewService {
         }
         return new ReadReviewResponse(review.getUser().getUsername(), review.getPlaceName(), review.getContent(),
                 review.getUrl(), review.getRating(), review.getCreatedAt(), review.getUpdatedAt(), imageByteList);
-    }
-
-    private void validateReadAuthorization(Review review, User user) {
-        if (review.getUser().equals(user)) {
-            return;
-        }
-        if (review.isPrivate()) {
-            throw new BusinessException(ErrorCodeAndMessage.FORBIDDEN);
-        } else if (review.isOnlyFriend()) {
-            if (!isFriend(review.getUser(), user)) {
-                throw new BusinessException(ErrorCodeAndMessage.FORBIDDEN);
-            }
-        }
-    }
-
-    private boolean isFriend(User reviewUser, User readUser) {
-        List<Friend> friends = friendQueryRepository.findFriendsByUser(reviewUser);
-        return friends.stream()
-                .anyMatch(friend -> friend.getToUser().equals(readUser));
     }
 
     public List<ReadReviewListResponse> readAllByUserIdentifier(String identifier) {
