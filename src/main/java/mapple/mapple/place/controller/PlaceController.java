@@ -3,8 +3,8 @@ package mapple.mapple.place.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import mapple.mapple.jwt.JwtUtils;
-import mapple.mapple.place.dto.CreatePlaceRequest;
-import mapple.mapple.place.dto.CreatePlaceResponse;
+import mapple.mapple.place.dto.CreateAndUpdatePlaceRequest;
+import mapple.mapple.place.dto.CreateAndUpdatePlaceResponse;
 import mapple.mapple.place.service.PlaceService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,12 +23,24 @@ public class PlaceController {
     private final JwtUtils jwtUtils;
 
     @PostMapping("/meeting/{meetingId}/place")
-    public ResponseEntity create(@Validated @RequestPart CreatePlaceRequest dto,
+    public ResponseEntity create(@Validated @RequestPart CreateAndUpdatePlaceRequest dto,
                                  @RequestPart(required = false) List<MultipartFile> files,
                                  @PathVariable("meetingId") long meetingId,
                                  HttpServletRequest request) throws IOException {
         String identifier = jwtUtils.getIdentifierFromHeader(request);
-        CreatePlaceResponse responseData = placeService.create(dto, files, meetingId, identifier);
+        CreateAndUpdatePlaceResponse responseData = placeService.create(dto, files, meetingId, identifier);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseData);
+    }
+
+    @PutMapping("/meeting/{meetingId}/place/{placeId}")
+    public ResponseEntity update(@Validated @RequestPart CreateAndUpdatePlaceRequest dto,
+                                 @RequestPart(required = false) List<MultipartFile> files,
+                                 @PathVariable("meetingId") long meetingId,
+                                 @PathVariable("placeId") long placeId,
+                                 HttpServletRequest request) throws IOException {
+        String identifier = jwtUtils.getIdentifierFromHeader(request);
+        CreateAndUpdatePlaceResponse responseData = placeService.update(dto, files, meetingId, placeId, identifier);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(responseData);
     }

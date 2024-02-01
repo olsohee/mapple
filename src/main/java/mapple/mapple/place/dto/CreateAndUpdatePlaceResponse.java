@@ -10,7 +10,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreatePlaceResponse {
+public class CreateAndUpdatePlaceResponse {
 
     private String username;
     private String meetingName;

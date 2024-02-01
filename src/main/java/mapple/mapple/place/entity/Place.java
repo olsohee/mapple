@@ -79,4 +79,10 @@ public class Place extends BaseEntity {
         String ext = updatedName.substring(pos + 1);
         return UUID.randomUUID() + "." + ext;
     }
+
+    public void update(String placeName, String content, String url) {
+        this.placeName = placeName;
+        this.content = content;
+        this.url = url;
+    }
 }
