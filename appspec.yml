@@ -1,0 +1,16 @@
+version: 0.0
+os: linux
+
+files:
+  - source: / # S3에서 EC2로 복사할 파일 디렉토리 경로
+    destination: /home/ubuntu/mapple # EC2 서버에서 파일이 복사될 위치
+    overwrite: yes # 해당 위치에 파일이 있는 경우 덮어쓰기
+permissions:
+  - object: /home/ubuntu/mapple # 권한이 지정되는 디렉토리 도는 파일
+    owner: ubuntu # object의 소유자
+    group: ubuntu # object의 그룹 이름
+hooks:
+  AfterInstall:
+    - location: scripts/deploy.sh # 배포 이후 실행시킬 스크립트
+      timeout: 60 # 스크립트 실행에 허용되는 시간, 이 시간을 넘으면 배포 실패로 간주
+      runas: ubuntu # 스크립트를 실행하는 사용자
