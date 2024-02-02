@@ -9,6 +9,7 @@ import mapple.mapple.entity.Image;
 import mapple.mapple.entity.PublicStatus;
 import mapple.mapple.friend.entity.Friend;
 import mapple.mapple.user.entity.User;
+import org.hibernate.annotations.BatchSize;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -47,6 +48,7 @@ public class Review extends BaseEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @BatchSize(size = 100)
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
     List<ReviewImage> images = new ArrayList<>();
 

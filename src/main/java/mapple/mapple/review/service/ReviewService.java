@@ -5,7 +5,8 @@ import mapple.mapple.entity.Image;
 import mapple.mapple.exception.ErrorCodeAndMessage;
 import mapple.mapple.exception.customException.ReviewException;
 import mapple.mapple.friend.entity.Friend;
-import mapple.mapple.friend.repository.FriendQueryRepository;
+import mapple.mapple.friend.entity.RequestStatus;
+import mapple.mapple.friend.repository.FriendRepository;
 import mapple.mapple.review.dto.ReadReviewListResponse;
 import mapple.mapple.review.dto.ReadReviewResponse;
 import mapple.mapple.entity.PublicStatus;
@@ -31,7 +32,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Transactional
@@ -40,7 +43,7 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
-    private final FriendQueryRepository friendQueryRepository;
+    private final FriendRepository friendRepository;
     private final ReviewValidator reviewValidator;
 
     @Value("${file.dir.review_image}")
@@ -75,12 +78,19 @@ public class ReviewService {
 
     public List<ReadReviewListResponse> readReadableAllReviews(String identifier) {
         User user = findUserByIdentifier(identifier);
-        List<Friend> friends = friendQueryRepository.findFriendsByUser(user);
 
-        // 자신의 리뷰 + 전체 공개 + 친구이면 친구 공개인 리뷰
-        List<Review> reviews = reviewRepository.findAll().stream()
-                .filter(review -> review.isPublic() || review.canRead(friends) || review.isOwn(user))
-                .toList();
+        Set<Review> reviews = new HashSet<>();
+        // 전체 공개인 리뷰
+        reviewRepository.findByPublicStatus(PublicStatus.PUBLIC).stream()
+                .forEach(review -> reviews.add(review));
+
+        // 유저 자신의 리뷰
+        reviewRepository.findByUserId(user.getId()).stream()
+                .forEach(review -> reviews.add(review));
+
+        // 유저 친구들의 리뷰
+        reviewRepository.findFriendReviewsByUserId(user.getId(), PublicStatus.ONLY_FRIEND, RequestStatus.ACCEPT).stream()
+                .forEach(review -> reviews.add(review));
 
         return reviews.stream()
                 .map(review -> new ReadReviewListResponse(review.getUser().getUsername(), review.getPlaceName(),
@@ -90,12 +100,14 @@ public class ReviewService {
 
     public List<ReadReviewListResponse> readFriendsReviews(String identifier) {
         User user = findUserByIdentifier(identifier);
-        List<Friend> friends = friendQueryRepository.findFriendsByUser(user);
 
-        List<Review> friendsReviews = reviewRepository.findAll().stream()
-                .filter(review -> review.checkIsFriendsReview(friends) && !review.isPrivate())
-                .toList();
-        return friendsReviews.stream()
+        Set<Review> reviews = new HashSet<>();
+        reviewRepository.findFriendReviewsByUserId(user.getId(), PublicStatus.PUBLIC, RequestStatus.ACCEPT).stream()
+                .forEach(review -> reviews.add(review));
+        reviewRepository.findFriendReviewsByUserId(user.getId(), PublicStatus.ONLY_FRIEND, RequestStatus.ACCEPT).stream()
+                .forEach(review -> reviews.add(review));
+
+        return reviews.stream()
                 .map(review -> new ReadReviewListResponse(review.getUser().getUsername(), review.getPlaceName(),
                         review.getRating(), review.getCreatedAt(), review.getUpdatedAt()))
                 .toList();
@@ -104,12 +116,9 @@ public class ReviewService {
     public ReadReviewResponse readOne(long reviewId, String identifier) throws IOException {
         Review review = findReviewById(reviewId);
         User user = findUserByIdentifier(identifier);
+        List<Friend> friends = friendRepository.findFriendsByUser(user, RequestStatus.ACCEPT);
 
-        reviewValidator.validateReviewAuthorization(review, user);
-        reviewValidator.validateIsNotPrivateReview(review);
-        if (review.isOnlyFriend()) {
-            reviewValidator.validateFriend(review.getUser(), user);
-        }
+        reviewValidator.validateCanRead(review, user, friends);
 
         // dto 생성
         List<byte[]> imageByteList = new ArrayList<>();
