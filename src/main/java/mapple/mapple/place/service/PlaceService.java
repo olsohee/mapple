@@ -82,8 +82,9 @@ public class PlaceService {
         Meeting meeting = findMeetingById(meetingId);
         meetingValidator.validateMeetingMember(meeting, user);
 
-        return placeRepository.findAll().stream()
-                .filter(place -> place.getMeeting().equals(meeting))
+        List<Place> places = placeRepository.findByMeetingId(meetingId);
+
+        return places.stream()
                 .map(place -> new ReadPlaceListResponse(place.getUser().getUsername(), place.getPlaceName(),
                         place.getCreatedAt(), place.getUpdatedAt()))
                 .toList();
