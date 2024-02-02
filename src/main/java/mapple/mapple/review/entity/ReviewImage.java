@@ -14,10 +14,9 @@ public class ReviewImage {
     private long id;
 
     @Embedded
-    @Column(nullable = false)
     private Image image;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "review_id")
     private Review review;
 

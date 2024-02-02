@@ -7,10 +7,13 @@ import lombok.Getter;
 @Getter
 public class Image {
 
+    @Column(nullable = false)
     private String storedName;
 
+    @Column(nullable = false)
     private String updatedName;
 
+    @Column(nullable = false)
     private String storeDir;
 
     public static Image create(String storedName, String updatedName, String storeDir) {

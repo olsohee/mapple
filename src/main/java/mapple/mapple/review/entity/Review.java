@@ -43,11 +43,11 @@ public class Review extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Rating rating;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
     List<ReviewImage> images = new ArrayList<>();
 
     public static Review create(String placeName, String content, String url,

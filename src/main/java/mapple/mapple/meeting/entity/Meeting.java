@@ -18,7 +18,7 @@ public class Meeting extends BaseEntity {
     @Column(nullable = false)
     private String meetingName;
 
-    @OneToMany
+    @OneToMany(mappedBy = "meeting")
     List<UserMeeting> userMeetings = new ArrayList<>();
 
     public static Meeting create(String meetingName) {

@@ -14,10 +14,9 @@ public class PlaceImage {
     private long id;
 
     @Embedded
-    @Column(nullable = false)
     private Image image;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "place_id")
     private Place place;
 
