@@ -50,13 +50,13 @@ public class ReviewQueryService {
     public Page<ReadReviewListResponse> readReadableReviews(String identifier, Pageable pageable) {
         User user = findUserByIdentifier(identifier);
         Page<Review> pageResult = reviewRepository.findReadableReviews(pageable, user.getId());
-        return pageResult.map(review -> new ReadReviewListResponse(user, review));
+        return pageResult.map(review -> new ReadReviewListResponse(review));
     }
 
     public Page<ReadReviewListResponse> readFriendsReviews(String identifier, Pageable pageable) {
         User user = findUserByIdentifier(identifier);
         Page<Review> pageResult = reviewRepository.findFriendReviewsByUserIdPage(pageable, user.getId());
-        return pageResult.map(review -> new ReadReviewListResponse(user, review));
+        return pageResult.map(review -> new ReadReviewListResponse(review));
     }
 
     public ReadReviewResponse readOne(long reviewId, String identifier) throws IOException {
@@ -72,7 +72,7 @@ public class ReviewQueryService {
                 .orElseThrow(() -> new UserException(ErrorCodeAndMessage.NOT_FOUND_USER));
         List<Review> reviews = reviewRepository.findByUserId(user.getId());
         return reviews.stream()
-                .map(review -> new ReadReviewListResponse(user, review))
+                .map(review -> new ReadReviewListResponse(review))
                 .toList();
     }
 

@@ -24,7 +24,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     @EntityGraph(attributePaths = "user")
     @Query("select r from Review r " +
-            "join Friend f on f.fromUser.id = :userId " +
+            "left outer join Friend f on f.fromUser.id = :userId " +
             "where r.publicStatus = mapple.mapple.entity.PublicStatus.PUBLIC " + // 전체 공개이거나
             "or r.user.id = :userId " + // 유저 자신의 리뷰이거나
             "or (r.user = f.toUser " + // 유저의 친구 리뷰이거나 (친구공개)
