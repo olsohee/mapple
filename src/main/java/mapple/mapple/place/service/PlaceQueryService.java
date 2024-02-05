@@ -17,6 +17,8 @@ import mapple.mapple.place.repository.PlaceRepository;
 import mapple.mapple.user.entity.User;
 import mapple.mapple.user.repository.UserRepository;
 import mapple.mapple.validator.MeetingValidator;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.FileCopyUtils;
@@ -51,17 +53,14 @@ public class PlaceQueryService {
                 imageByteList);
     }
 
-    public List<ReadPlaceListResponse> readAll(long meetingId, String identifier) {
+    public Page<ReadPlaceListResponse> readAll(long meetingId, String identifier, Pageable pageable) {
         User user = findUserByIdentifier(identifier);
         Meeting meeting = findMeetingById(meetingId);
         meetingValidator.validateMeetingMember(meeting, user);
 
-        List<Place> places = placeRepository.findByMeetingId(meetingId);
-
-        return places.stream()
-                .map(place -> new ReadPlaceListResponse(place.getUser().getUsername(), place.getPlaceName(),
-                        place.getCreatedAt(), place.getUpdatedAt()))
-                .toList();
+        Page<Place> pageResult = placeRepository.findAllByMeetingId(pageable, meetingId);
+        return pageResult.map(place -> new ReadPlaceListResponse(place.getUser().getUsername(), place.getPlaceName(),
+                place.getCreatedAt(), place.getUpdatedAt()));
     }
 
     public ReadPlaceResponse readOne(long meetingId, long placeId, String identifier) throws IOException {

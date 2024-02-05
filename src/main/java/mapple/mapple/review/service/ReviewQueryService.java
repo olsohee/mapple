@@ -18,6 +18,8 @@ import mapple.mapple.review.repository.ReviewRepository;
 import mapple.mapple.user.entity.User;
 import mapple.mapple.user.repository.UserRepository;
 import mapple.mapple.validator.ReviewValidator;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.FileCopyUtils;
@@ -52,41 +54,39 @@ public class ReviewQueryService {
                 review.getPublicStatus(), review.getRating(), review.getCreatedAt(), review.getUpdatedAt(), imageByteList);
     }
 
-    public List<ReadReviewListResponse> readReadableAllReviews(String identifier) {
+    public Page<ReadReviewListResponse> readReadableReviews(String identifier, Pageable pageable) {
         User user = findUserByIdentifier(identifier);
 
-        Set<Review> reviews = new HashSet<>();
-        // 전체 공개인 리뷰
-        reviewRepository.findByPublicStatus(PublicStatus.PUBLIC).stream()
-                .forEach(review -> reviews.add(review));
+        Page<Review> pageResult = reviewRepository.findReadableReviews(pageable, user.getId());
+        return pageResult.map(review -> new ReadReviewListResponse(review.getUser().getUsername(), review.getPlaceName(),
+                review.getRating(), review.getCreatedAt(), review.getUpdatedAt()));
 
-        // 유저 자신의 리뷰
-        reviewRepository.findByUserId(user.getId()).stream()
-                .forEach(review -> reviews.add(review));
+//        Set<Review> reviews = new HashSet<>();
+//        // 전체 공개인 리뷰
+//        reviewRepository.findByPublicStatus(PublicStatus.PUBLIC).stream()
+//                .forEach(review -> reviews.add(review));
+//
+//        // 유저 자신의 리뷰
+//        reviewRepository.findByUserId(user.getId()).stream()
+//                .forEach(review -> reviews.add(review));
+//
+//        // 유저 친구들의 리뷰
+//        reviewRepository.findFriendReviewsByUserId(user.getId(), PublicStatus.ONLY_FRIEND, RequestStatus.ACCEPT).stream()
+//                .forEach(review -> reviews.add(review));
 
-        // 유저 친구들의 리뷰
-        reviewRepository.findFriendReviewsByUserId(user.getId(), PublicStatus.ONLY_FRIEND, RequestStatus.ACCEPT).stream()
-                .forEach(review -> reviews.add(review));
-
-        return reviews.stream()
-                .map(review -> new ReadReviewListResponse(review.getUser().getUsername(), review.getPlaceName(),
-                        review.getRating(), review.getCreatedAt(), review.getUpdatedAt()))
-                .toList();
+//        return reviews.stream()
+//                .map(review -> new ReadReviewListResponse(review.getUser().getUsername(), review.getPlaceName(),
+//                        review.getRating(), review.getCreatedAt(), review.getUpdatedAt()))
+//                .toList();
     }
 
-    public List<ReadReviewListResponse> readFriendsReviews(String identifier) {
+    public Page<ReadReviewListResponse> readFriendsReviews(String identifier, Pageable pageable) {
         User user = findUserByIdentifier(identifier);
 
-        Set<Review> reviews = new HashSet<>();
-        reviewRepository.findFriendReviewsByUserId(user.getId(), PublicStatus.PUBLIC, RequestStatus.ACCEPT).stream()
-                .forEach(review -> reviews.add(review));
-        reviewRepository.findFriendReviewsByUserId(user.getId(), PublicStatus.ONLY_FRIEND, RequestStatus.ACCEPT).stream()
-                .forEach(review -> reviews.add(review));
+        Page<Review> pageResult = reviewRepository.findFriendReviewsByUserIdPage(pageable, user.getId());
 
-        return reviews.stream()
-                .map(review -> new ReadReviewListResponse(review.getUser().getUsername(), review.getPlaceName(),
-                        review.getRating(), review.getCreatedAt(), review.getUpdatedAt()))
-                .toList();
+        return pageResult.map(review -> new ReadReviewListResponse(review.getUser().getUsername(), review.getPlaceName(),
+                review.getRating(), review.getCreatedAt(), review.getUpdatedAt()));
     }
 
     public ReadReviewResponse readOne(long reviewId, String identifier) throws IOException {

@@ -10,6 +10,10 @@ import mapple.mapple.place.dto.ReadPlaceListResponse;
 import mapple.mapple.place.dto.ReadPlaceResponse;
 import mapple.mapple.place.service.PlaceQueryService;
 import mapple.mapple.place.service.PlaceService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -63,9 +67,11 @@ public class PlaceController {
     }
 
     @GetMapping("/meeting/{meetingId}/places")
-    public ResponseEntity readAll(@PathVariable("meetingId") long meetingId, HttpServletRequest request) {
+    public ResponseEntity readAll(@PathVariable("meetingId") long meetingId,
+                                  @PageableDefault(size = 5, page = 0, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+                                  HttpServletRequest request) {
         String identifier = jwtUtils.getIdentifierFromHeader(request);
-        List<ReadPlaceListResponse> responseData = placeQueryService.readAll(meetingId, identifier);
+        Page<ReadPlaceListResponse> responseData = placeQueryService.readAll(meetingId, identifier, pageable);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new SuccessResponse("플레이스 리스트 조회 성공", responseData));
     }

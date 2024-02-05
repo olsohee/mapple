@@ -10,6 +10,10 @@ import mapple.mapple.review.dto.ReadReviewListResponse;
 import mapple.mapple.review.dto.ReadReviewResponse;
 import mapple.mapple.review.service.ReviewQueryService;
 import mapple.mapple.review.service.ReviewService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -52,18 +56,29 @@ public class ReviewController {
                 .body(new SuccessResponse("리뷰 수정 성공", responseData));
     }
 
-    @GetMapping("/reviews")
-    public ResponseEntity readReadableAllReviews(HttpServletRequest request) {
+    @DeleteMapping("/review/{reviewId}")
+    public ResponseEntity delete(@PathVariable("reviewId") long reviewId, HttpServletRequest request) {
         String identifier = jwtUtils.getIdentifierFromHeader(request);
-        List<ReadReviewListResponse> responseData = reviewQueryService.readReadableAllReviews(identifier);
+        reviewService.delete(reviewId, identifier);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new SuccessResponse("리뷰 삭제 성공"));
+
+    }
+
+    @GetMapping("/reviews")
+    public ResponseEntity readReadableReviews(@PageableDefault(size = 5, page = 0, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+                                              HttpServletRequest request) {
+        String identifier = jwtUtils.getIdentifierFromHeader(request);
+        Page<ReadReviewListResponse> responseData = reviewQueryService.readReadableReviews(identifier, pageable);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new SuccessResponse("전체 리뷰 리스트 조회 성공", responseData));
     }
 
     @GetMapping("/reviews/friend")
-    public ResponseEntity readFriendsReviews(HttpServletRequest request) {
+    public ResponseEntity readFriendsReviews(@PageableDefault(size = 5, page = 0, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+                                             HttpServletRequest request) {
         String identifier = jwtUtils.getIdentifierFromHeader(request);
-        List<ReadReviewListResponse> responseData = reviewQueryService.readFriendsReviews(identifier);
+        Page<ReadReviewListResponse> responseData = reviewQueryService.readFriendsReviews(identifier, pageable);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new SuccessResponse("친구 리뷰 리스트 조회 성공", responseData));
     }
@@ -74,14 +89,5 @@ public class ReviewController {
         ReadReviewResponse responseData = reviewQueryService.readOne(reviewId, identifier);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new SuccessResponse("단일 리뷰 조회 성공", responseData));
-    }
-
-    @DeleteMapping("/review/{reviewId}")
-    public ResponseEntity delete(@PathVariable("reviewId") long reviewId, HttpServletRequest request) {
-        String identifier = jwtUtils.getIdentifierFromHeader(request);
-        reviewService.delete(reviewId, identifier);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new SuccessResponse("리뷰 삭제 성공"));
-
     }
 }
