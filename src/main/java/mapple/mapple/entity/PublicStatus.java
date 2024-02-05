@@ -9,7 +9,7 @@ import java.util.Arrays;
 @AllArgsConstructor
 public enum PublicStatus {
 
-    PUBLIC("공개"),
+    PUBLIC("전체공개"),
     ONLY_FRIEND("친구공개"),
     PRIVATE("비공개");
 
