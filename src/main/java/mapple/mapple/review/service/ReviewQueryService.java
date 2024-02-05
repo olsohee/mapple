@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Set;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ReviewQueryService {
 
