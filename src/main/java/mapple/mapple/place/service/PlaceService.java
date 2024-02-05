@@ -1,19 +1,14 @@
 package mapple.mapple.place.service;
 
 import lombok.RequiredArgsConstructor;
-import mapple.mapple.entity.Image;
-import mapple.mapple.exception.*;
+import mapple.mapple.exception.ErrorCodeAndMessage;
 import mapple.mapple.exception.customException.MeetingException;
 import mapple.mapple.exception.customException.PlaceException;
 import mapple.mapple.exception.customException.UserException;
 import mapple.mapple.meeting.entity.Meeting;
 import mapple.mapple.meeting.repository.MeetingRepository;
 import mapple.mapple.place.dto.CreateAndUpdatePlaceRequest;
-import mapple.mapple.place.dto.CreateAndUpdatePlaceResponse;
-import mapple.mapple.place.dto.ReadPlaceListResponse;
-import mapple.mapple.place.dto.ReadPlaceResponse;
 import mapple.mapple.place.entity.Place;
-import mapple.mapple.place.entity.PlaceImage;
 import mapple.mapple.place.repository.PlaceRepository;
 import mapple.mapple.user.entity.User;
 import mapple.mapple.user.repository.UserRepository;
@@ -22,32 +17,27 @@ import mapple.mapple.validator.PlaceValidator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
-@Service
 @Transactional
+@Service
 @RequiredArgsConstructor
 public class PlaceService {
 
     private final PlaceRepository placeRepository;
-    private final MeetingRepository meetingRepository;
     private final UserRepository userRepository;
-    private final MeetingValidator meetingValidator;
+    private final MeetingRepository meetingRepository;
+
     private final PlaceValidator placeValidator;
+    private final MeetingValidator meetingValidator;
 
     @Value("${file.dir.place_image}")
     private String placeImageFileDir;
 
-    public CreateAndUpdatePlaceResponse create(CreateAndUpdatePlaceRequest dto, List<MultipartFile> files, long meetingId, String identifier) throws IOException {
+    public long create(CreateAndUpdatePlaceRequest dto, List<MultipartFile> files, long meetingId, String identifier) throws IOException {
         User user = findUserByIdentifier(identifier);
         Meeting meeting = findMeetingById(meetingId);
 
@@ -59,64 +49,12 @@ public class PlaceService {
         }
 
         placeRepository.save(place);
-
-        // dto 생성
-        List<byte[]> imageByteList = new ArrayList<>();
-        for (PlaceImage placeImage : place.getImages()) {
-            Image image = placeImage.getImage();
-            Path path = Paths.get(image.getStoreDir() + image.getStoredName());
-            if (Files.probeContentType(path) != null) {
-                File file = new File(image.getStoreDir() + image.getStoredName());
-                byte[] imageByte = FileCopyUtils.copyToByteArray(file);
-                imageByteList.add(imageByte);
-            }
-        }
-
-        return new CreateAndUpdatePlaceResponse(user.getUsername(), meeting.getMeetingName(), place.getPlaceName(),
-                place.getContent(), place.getUrl(), place.getCreatedAt(), place.getUpdatedAt(),
-                imageByteList);
+        return place.getId();
     }
 
-    public List<ReadPlaceListResponse> readAll(long meetingId, String identifier) {
-        User user = findUserByIdentifier(identifier);
-        Meeting meeting = findMeetingById(meetingId);
-        meetingValidator.validateMeetingMember(meeting, user);
-
-        List<Place> places = placeRepository.findByMeetingId(meetingId);
-
-        return places.stream()
-                .map(place -> new ReadPlaceListResponse(place.getUser().getUsername(), place.getPlaceName(),
-                        place.getCreatedAt(), place.getUpdatedAt()))
-                .toList();
-    }
-
-    public ReadPlaceResponse readOne(long meetingId, long placeId, String identifier) throws IOException {
-        User user = findUserByIdentifier(identifier);
-        Meeting meeting = findMeetingById(meetingId);
-        meetingValidator.validateMeetingMember(meeting, user);
-
-        Place place = findPlaceById(placeId);
-
-        // dto 생성
-        List<byte[]> imageByteList = new ArrayList<>();
-        for (PlaceImage placeImage : place.getImages()) {
-            Image image = placeImage.getImage();
-            Path path = Paths.get(image.getStoreDir() + image.getStoredName());
-            if (Files.probeContentType(path) != null) {
-                File file = new File(image.getStoreDir() + image.getStoredName());
-                byte[] imageByte = FileCopyUtils.copyToByteArray(file);
-                imageByteList.add(imageByte);
-            }
-        }
-        return new ReadPlaceResponse(user.getUsername(), place.getPlaceName(), place.getContent(),
-                place.getUrl(), place.getCreatedAt(), place.getUpdatedAt(), imageByteList);
-    }
-
-    public CreateAndUpdatePlaceResponse update(CreateAndUpdatePlaceRequest dto, List<MultipartFile> files,
-                                               long meetingId, long placeId, String identifier) throws IOException {
+    public long update(CreateAndUpdatePlaceRequest dto, List<MultipartFile> files, long placeId, String identifier) throws IOException {
         User user = findUserByIdentifier(identifier);
         Place place = findPlaceById(placeId);
-        Meeting meeting = findMeetingById(meetingId);
 
         placeValidator.validatePlaceAuthorization(user, place);
 
@@ -125,21 +63,7 @@ public class PlaceService {
             place.updateImages(files, placeImageFileDir);
         }
 
-        // dto 생성
-        List<byte[]> imageByteList = new ArrayList<>();
-        for (PlaceImage placeImage : place.getImages()) {
-            Image image = placeImage.getImage();
-            Path path = Paths.get(image.getStoreDir() + image.getStoredName());
-            if (Files.probeContentType(path) != null) {
-                File file = new File(image.getStoreDir() + image.getStoredName());
-                byte[] imageByte = FileCopyUtils.copyToByteArray(file);
-                imageByteList.add(imageByte);
-            }
-        }
-
-        return new CreateAndUpdatePlaceResponse(user.getUsername(), meeting.getMeetingName(), place.getPlaceName(),
-                place.getContent(), place.getUrl(), place.getCreatedAt(), place.getUpdatedAt(),
-                imageByteList);
+        return place.getId();
     }
 
     public void delete(long placeId, String identifier) {
