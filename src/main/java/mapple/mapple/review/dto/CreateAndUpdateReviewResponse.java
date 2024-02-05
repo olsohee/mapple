@@ -1,17 +1,17 @@
 package mapple.mapple.review.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import mapple.mapple.entity.PublicStatus;
 import mapple.mapple.review.entity.Rating;
+import mapple.mapple.review.entity.Review;
+import mapple.mapple.user.entity.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 public class CreateAndUpdateReviewResponse {
 
     private String username;
@@ -23,4 +23,16 @@ public class CreateAndUpdateReviewResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<byte[]> images;
+
+    public CreateAndUpdateReviewResponse(User user, Review review, List<byte[]> images) {
+        this.username = user.getUsername();
+        this.placeName = review.getPlaceName();
+        this.content = review.getContent();
+        this.url = review.getUrl();
+        this.publicStatus = review.getPublicStatus();
+        this.rating = review.getRating();
+        this.createdAt = review.getCreatedAt();
+        this.updatedAt = review.getUpdatedAt();
+        this.images = images;
+    }
 }

@@ -30,7 +30,7 @@ public class FriendService {
                 .orElseThrow(() -> new UserException(ErrorCodeAndMessage.NOT_FOUND_USER));
         Friend friend = Friend.create(fromUser, toUser);
         friendRepository.save(friend);
-        return new FriendRequestsResponse(friend.getFromUser().getUsername(), friend.getToUser().getUsername(), friend.getRequestStatus());
+        return new FriendRequestsResponse(friend);
     }
 
     public FriendRequestsResponse accept(String identifier, long friendId) {
@@ -40,7 +40,7 @@ public class FriendService {
         friend.acceptRequest();
         Friend reverseFriend = Friend.createReverse(friend.getFromUser(), friend.getToUser());
         friendRepository.save(reverseFriend);
-        return new FriendRequestsResponse(friend.getFromUser().getUsername(), friend.getToUser().getUsername(), friend.getRequestStatus());
+        return new FriendRequestsResponse(friend);
     }
 
     public void refuse(String identifier, long friendId) {

@@ -9,7 +9,6 @@ import mapple.mapple.friend.entity.RequestStatus;
 import mapple.mapple.friend.repository.FriendRepository;
 import mapple.mapple.review.dto.ReadReviewListResponse;
 import mapple.mapple.review.dto.ReadReviewResponse;
-import mapple.mapple.entity.PublicStatus;
 import mapple.mapple.exception.customException.UserException;
 import mapple.mapple.review.entity.Review;
 import mapple.mapple.review.dto.CreateAndUpdateReviewResponse;
@@ -30,9 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Service
 @Transactional(readOnly = true)
@@ -47,59 +44,27 @@ public class ReviewQueryService {
     public CreateAndUpdateReviewResponse readCreatedUpdatedReview(long reviewId, String identifier) throws IOException {
         Review review = findReviewById(reviewId);
         User user = findUserByIdentifier(identifier);
-
-        List<byte[]> imageByteList = createImagesByteList(review.getImages());
-
-        return new CreateAndUpdateReviewResponse(user.getUsername(), review.getPlaceName(), review.getContent(), review.getUrl(),
-                review.getPublicStatus(), review.getRating(), review.getCreatedAt(), review.getUpdatedAt(), imageByteList);
+        return new CreateAndUpdateReviewResponse(user, review, createImagesByteList(review.getImages()));
     }
 
     public Page<ReadReviewListResponse> readReadableReviews(String identifier, Pageable pageable) {
         User user = findUserByIdentifier(identifier);
-
         Page<Review> pageResult = reviewRepository.findReadableReviews(pageable, user.getId());
-        return pageResult.map(review -> new ReadReviewListResponse(review.getUser().getUsername(), review.getPlaceName(),
-                review.getRating(), review.getCreatedAt(), review.getUpdatedAt()));
-
-//        Set<Review> reviews = new HashSet<>();
-//        // 전체 공개인 리뷰
-//        reviewRepository.findByPublicStatus(PublicStatus.PUBLIC).stream()
-//                .forEach(review -> reviews.add(review));
-//
-//        // 유저 자신의 리뷰
-//        reviewRepository.findByUserId(user.getId()).stream()
-//                .forEach(review -> reviews.add(review));
-//
-//        // 유저 친구들의 리뷰
-//        reviewRepository.findFriendReviewsByUserId(user.getId(), PublicStatus.ONLY_FRIEND, RequestStatus.ACCEPT).stream()
-//                .forEach(review -> reviews.add(review));
-
-//        return reviews.stream()
-//                .map(review -> new ReadReviewListResponse(review.getUser().getUsername(), review.getPlaceName(),
-//                        review.getRating(), review.getCreatedAt(), review.getUpdatedAt()))
-//                .toList();
+        return pageResult.map(review -> new ReadReviewListResponse(user, review));
     }
 
     public Page<ReadReviewListResponse> readFriendsReviews(String identifier, Pageable pageable) {
         User user = findUserByIdentifier(identifier);
-
         Page<Review> pageResult = reviewRepository.findFriendReviewsByUserIdPage(pageable, user.getId());
-
-        return pageResult.map(review -> new ReadReviewListResponse(review.getUser().getUsername(), review.getPlaceName(),
-                review.getRating(), review.getCreatedAt(), review.getUpdatedAt()));
+        return pageResult.map(review -> new ReadReviewListResponse(user, review));
     }
 
     public ReadReviewResponse readOne(long reviewId, String identifier) throws IOException {
         Review review = findReviewById(reviewId);
         User user = findUserByIdentifier(identifier);
         List<Friend> friends = friendRepository.findFriendsByUser(user, RequestStatus.ACCEPT);
-
         reviewValidator.validateCanRead(review, user, friends);
-
-        List<byte[]> imageByteList = createImagesByteList(review.getImages());
-
-        return new ReadReviewResponse(review.getUser().getUsername(), review.getPlaceName(), review.getContent(),
-                review.getUrl(), review.getRating(), review.getCreatedAt(), review.getUpdatedAt(), imageByteList);
+        return new ReadReviewResponse(user, review, createImagesByteList(review.getImages()));
     }
 
     public List<ReadReviewListResponse> readAllByUserIdentifier(String identifier) {
@@ -107,8 +72,7 @@ public class ReviewQueryService {
                 .orElseThrow(() -> new UserException(ErrorCodeAndMessage.NOT_FOUND_USER));
         List<Review> reviews = reviewRepository.findByUserId(user.getId());
         return reviews.stream()
-                .map(review -> new ReadReviewListResponse(review.getUser().getUsername(), review.getPlaceName(),
-                        review.getRating(), review.getCreatedAt(), review.getUpdatedAt()))
+                .map(review -> new ReadReviewListResponse(user, review))
                 .toList();
     }
 

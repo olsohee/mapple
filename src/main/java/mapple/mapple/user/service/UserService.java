@@ -30,8 +30,7 @@ public class UserService {
         validateDuplication(dto.getEmail());
         User user = User.create(dto.getUsername(), dto.getEmail(), dto.getPassword(), dto.getPhoneNumber());
         userRepository.save(user);
-        return new JoinResponse(user.getIdentifier(), user.getUsername(), user.getPhoneNumber(),
-                user.getOAuthProvider(), user.getCreatedAt(), user.getUpdatedAt());
+        return new JoinResponse(user);
     }
 
     private void validateDuplication(String email) {

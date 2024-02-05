@@ -46,9 +46,6 @@ public class MeetingService {
             }
         }
 
-        List<String> userNames = users.stream()
-                .map(member -> member.getUsername())
-                .toList();
-        return new CreateMeetingResponse(meeting.getMeetingName(), userNames);
+        return new CreateMeetingResponse(meeting);
     }
 }

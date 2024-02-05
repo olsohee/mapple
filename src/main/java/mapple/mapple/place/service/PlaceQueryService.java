@@ -45,35 +45,23 @@ public class PlaceQueryService {
         Place place = findPlaceById(placeId);
         Meeting meeting = findMeetingById(meetingId);
         User user = findUserByIdentifier(identifier);
-
-        List<byte[]> imageByteList = createImagesByteList(place.getImages());
-
-        return new CreateAndUpdatePlaceResponse(user.getUsername(), meeting.getMeetingName(), place.getPlaceName(),
-                place.getContent(), place.getUrl(), place.getCreatedAt(), place.getUpdatedAt(),
-                imageByteList);
+        return new CreateAndUpdatePlaceResponse(user, meeting, place, createImagesByteList(place.getImages()));
     }
 
     public Page<ReadPlaceListResponse> readAll(long meetingId, String identifier, Pageable pageable) {
         User user = findUserByIdentifier(identifier);
         Meeting meeting = findMeetingById(meetingId);
         meetingValidator.validateMeetingMember(meeting, user);
-
         Page<Place> pageResult = placeRepository.findAllByMeetingId(pageable, meetingId);
-        return pageResult.map(place -> new ReadPlaceListResponse(place.getUser().getUsername(), place.getPlaceName(),
-                place.getCreatedAt(), place.getUpdatedAt()));
+        return pageResult.map(place -> new ReadPlaceListResponse(user, place));
     }
 
     public ReadPlaceResponse readOne(long meetingId, long placeId, String identifier) throws IOException {
         User user = findUserByIdentifier(identifier);
         Meeting meeting = findMeetingById(meetingId);
         meetingValidator.validateMeetingMember(meeting, user);
-
         Place place = findPlaceById(placeId);
-
-        List<byte[]> imageByteList = createImagesByteList(place.getImages());
-
-        return new ReadPlaceResponse(user.getUsername(), place.getPlaceName(), place.getContent(),
-                place.getUrl(), place.getCreatedAt(), place.getUpdatedAt(), imageByteList);
+        return new ReadPlaceResponse(user, place, createImagesByteList(place.getImages()));
     }
 
     private User findUserByIdentifier(String identifier) {
