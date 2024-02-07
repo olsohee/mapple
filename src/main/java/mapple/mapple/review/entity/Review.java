@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import mapple.mapple.entity.BaseEntity;
 import mapple.mapple.entity.Image;
 import mapple.mapple.entity.PublicStatus;
+import mapple.mapple.exception.ErrorCodeAndMessage;
+import mapple.mapple.exception.customException.ReviewException;
 import mapple.mapple.friend.entity.Friend;
 import mapple.mapple.user.entity.User;
 import org.hibernate.annotations.BatchSize;
@@ -50,7 +52,10 @@ public class Review extends BaseEntity {
 
     @BatchSize(size = 100)
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<ReviewImage> images = new ArrayList<>();
+    private List<ReviewImage> images = new ArrayList<>();
+
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReviewLike> likes = new ArrayList<>();
 
     public static Review create(String placeName, String content, String url,
                                 PublicStatus publicStatus, Rating rating, User user) {
@@ -72,6 +77,14 @@ public class Review extends BaseEntity {
         }
         image.setReview(this);
         this.images.add(image);
+    }
+
+    public void addLike(ReviewLike like) {
+        if (like.getReview() != null) {
+            like.getReview().getLikes().remove(like);
+        }
+        this.likes.add(like);
+        like.setReview(this);
     }
 
     public void update(String placeName, String content, Rating rating, PublicStatus publicStatus, String url) {
@@ -105,29 +118,32 @@ public class Review extends BaseEntity {
         this.images.clear();
     }
 
-    public boolean checkIsFriendsReview(List<Friend> friends) {
-        return friends.stream()
-                .anyMatch(friend -> friend.getToUser() == this.user);
-    }
-
     public boolean isPublic() {
         return publicStatus == PublicStatus.PUBLIC;
-    }
-
-    public boolean canRead(List<Friend> friends) {
-        return friends.stream()
-                .anyMatch(friend -> (friend.getToUser() == this.user) && publicStatus == PublicStatus.ONLY_FRIEND);
     }
 
     public boolean isPrivate() {
         return publicStatus == PublicStatus.PRIVATE;
     }
 
-    public boolean isOwn(User user) {
-        return this.user == user;
-    }
-
     public boolean isOnlyFriend() {
         return publicStatus == PublicStatus.ONLY_FRIEND;
+    }
+
+    public boolean isLikeUser(User user) {
+        return likes.stream()
+                .anyMatch(like -> like.getUser().equals(user));
+    }
+
+    public void unlike(User user) {
+        ReviewLike reviewLike = likes.stream()
+                .filter(like -> like.getUser().equals(user))
+                .findAny().get();
+        likes.remove(reviewLike);
+    }
+
+    public void like(User user) {
+        ReviewLike reviewLike = ReviewLike.create(this, user);
+        this.addLike(reviewLike);
     }
 }

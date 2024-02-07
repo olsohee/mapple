@@ -90,4 +90,14 @@ public class ReviewController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new SuccessResponse("단일 리뷰 조회 성공", responseData));
     }
+
+    @PostMapping("/review/{reviewId}/like")
+    public ResponseEntity likeReview(@PathVariable("reviewId") long reviewId, HttpServletRequest request) throws IOException {
+        String identifier = jwtUtils.getIdentifierFromHeader(request);
+        reviewService.like(reviewId, identifier);
+
+        ReadReviewResponse responseData = reviewQueryService.readOne(reviewId, identifier);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new SuccessResponse("좋아요 누르기/취소 성공", responseData));
+    }
 }

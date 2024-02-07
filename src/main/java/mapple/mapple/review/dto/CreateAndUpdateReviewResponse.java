@@ -20,17 +20,19 @@ public class CreateAndUpdateReviewResponse {
     private String url;
     private PublicStatus publicStatus;
     private Rating rating;
+    private Long likeCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<byte[]> images;
 
-    public CreateAndUpdateReviewResponse(User user, Review review, List<byte[]> images) {
+    public CreateAndUpdateReviewResponse(User user, Review review, Long likeCount, List<byte[]> images) {
         this.username = user.getUsername();
         this.placeName = review.getPlaceName();
         this.content = review.getContent();
         this.url = review.getUrl();
         this.publicStatus = review.getPublicStatus();
         this.rating = review.getRating();
+        this.likeCount = likeCount;
         this.createdAt = review.getCreatedAt();
         this.updatedAt = review.getUpdatedAt();
         this.images = images;

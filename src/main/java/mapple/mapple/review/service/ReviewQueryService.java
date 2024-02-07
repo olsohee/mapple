@@ -13,6 +13,7 @@ import mapple.mapple.exception.customException.UserException;
 import mapple.mapple.review.entity.Review;
 import mapple.mapple.review.dto.CreateAndUpdateReviewResponse;
 import mapple.mapple.review.entity.ReviewImage;
+import mapple.mapple.review.repository.ReviewLikeRepository;
 import mapple.mapple.review.repository.ReviewRepository;
 import mapple.mapple.user.entity.User;
 import mapple.mapple.user.repository.UserRepository;
@@ -37,6 +38,7 @@ import java.util.List;
 public class ReviewQueryService {
 
     private final ReviewRepository reviewRepository;
+    private final ReviewLikeRepository reviewLikeRepository;
     private final UserRepository userRepository;
     private final FriendRepository friendRepository;
     private final ReviewValidator reviewValidator;
@@ -44,7 +46,8 @@ public class ReviewQueryService {
     public CreateAndUpdateReviewResponse readCreatedUpdatedReview(long reviewId, String identifier) throws IOException {
         Review review = findReviewById(reviewId);
         User user = findUserByIdentifier(identifier);
-        return new CreateAndUpdateReviewResponse(user, review, createImagesByteList(review.getImages()));
+        Long likeCount = reviewLikeRepository.countByReviewId(reviewId);
+        return new CreateAndUpdateReviewResponse(user, review, likeCount, createImagesByteList(review.getImages()));
     }
 
     public Page<ReadReviewListResponse> readReadableReviews(String identifier, Pageable pageable) {
@@ -64,7 +67,8 @@ public class ReviewQueryService {
         User user = findUserByIdentifier(identifier);
         List<Friend> friends = friendRepository.findFriendsByUser(user, RequestStatus.ACCEPT);
         reviewValidator.validateCanRead(review, user, friends);
-        return new ReadReviewResponse(user, review, createImagesByteList(review.getImages()));
+        Long likeCount = reviewLikeRepository.countByReviewId(reviewId);
+        return new ReadReviewResponse(user, review, likeCount, createImagesByteList(review.getImages()));
     }
 
     public List<ReadReviewListResponse> readAllByUserIdentifier(String identifier) {

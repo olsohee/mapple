@@ -70,6 +70,16 @@ public class ReviewService {
         reviewRepository.delete(review);
     }
 
+    public void like(long reviewId, String identifier) {
+        Review review = findReviewById(reviewId);
+        User user = findUserByIdentifier(identifier);
+        if (review.isLikeUser(user)) {
+            review.unlike(user);
+        } else {
+            review.like(user);
+        }
+    }
+
     private User findUserByIdentifier(String identifier) {
         return userRepository.findByIdentifier(identifier)
                 .orElseThrow(() -> new UserException(ErrorCodeAndMessage.NOT_FOUND_USER));
