@@ -1,10 +1,12 @@
 package mapple.mapple.review.repository;
 
+import jakarta.persistence.LockModeType;
 import mapple.mapple.review.entity.Review;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -18,6 +20,10 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Override
     @EntityGraph(attributePaths = "user")
     Optional<Review> findById(Long aLong);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select r from Review r where r.id = :reviewId")
+    Review findReviewWithLock(@Param("reviewId") Long reviewId);
 
     @EntityGraph(attributePaths = "user")
     List<Review> findByUserId(long userId);

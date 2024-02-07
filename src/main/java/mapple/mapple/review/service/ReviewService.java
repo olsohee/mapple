@@ -71,7 +71,7 @@ public class ReviewService {
     }
 
     public void like(long reviewId, String identifier) {
-        Review review = findReviewById(reviewId);
+        Review review = reviewRepository.findReviewWithLock(reviewId);
         User user = findUserByIdentifier(identifier);
         if (review.isLikeUser(user)) {
             review.unlike(user);
