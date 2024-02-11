@@ -18,18 +18,18 @@ public class ReadReviewResponse {
     private String content;
     private String url;
     private Rating rating;
-    private Long likeCount;
+    private int likeCount;
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
     private List<byte[]> images;
 
-    public ReadReviewResponse(User user, Review review, Long likeCount, List<byte[]> images) {
+    public ReadReviewResponse(User user, Review review, List<byte[]> images) {
         this.username = user.getUsername();
         this.placeName = review.getPlaceName();
         this.content = review.getContent();
         this.url = review.getUrl();
         this.rating = review.getRating();
-        this.likeCount = likeCount;
+        this.likeCount = review.getLikeCount();
         this.createdDate = review.getCreatedAt();
         this.updatedDate = review.getUpdatedAt();
         this.images = images;

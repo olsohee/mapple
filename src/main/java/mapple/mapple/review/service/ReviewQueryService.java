@@ -67,8 +67,7 @@ public class ReviewQueryService {
         User user = findUserByIdentifier(identifier);
         List<Friend> friends = friendRepository.findFriendsByUser(user, RequestStatus.ACCEPT);
         reviewValidator.validateCanRead(review, user, friends);
-        Long likeCount = reviewLikeRepository.countByReviewId(reviewId);
-        return new ReadReviewResponse(user, review, likeCount, createImagesByteList(review.getImages()));
+        return new ReadReviewResponse(user, review, createImagesByteList(review.getImages()));
     }
 
     public List<ReadReviewListResponse> readAllByUserIdentifier(String identifier) {

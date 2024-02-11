@@ -7,9 +7,6 @@ import lombok.NoArgsConstructor;
 import mapple.mapple.entity.BaseEntity;
 import mapple.mapple.entity.Image;
 import mapple.mapple.entity.PublicStatus;
-import mapple.mapple.exception.ErrorCodeAndMessage;
-import mapple.mapple.exception.customException.ReviewException;
-import mapple.mapple.friend.entity.Friend;
 import mapple.mapple.user.entity.User;
 import org.hibernate.annotations.BatchSize;
 import org.springframework.web.multipart.MultipartFile;
@@ -45,6 +42,9 @@ public class Review extends BaseEntity {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Rating rating;
+
+    @Column(nullable = false)
+    private int likeCount;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -139,11 +139,13 @@ public class Review extends BaseEntity {
         ReviewLike reviewLike = likes.stream()
                 .filter(like -> like.getUser().equals(user))
                 .findAny().get();
+        likeCount--;
         likes.remove(reviewLike);
     }
 
     public void like(User user) {
         ReviewLike reviewLike = ReviewLike.create(this, user);
+        likeCount++;
         this.addLike(reviewLike);
     }
 }
