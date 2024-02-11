@@ -46,7 +46,7 @@ public class ReviewService {
     }
 
     public long update(long reviewId, String identifier, CreateAndUpdateReviewRequest dto, List<MultipartFile> files) throws IOException {
-        Review review = findReviewById(reviewId);
+        Review review = findReviewByIdWithUser(reviewId);
         User user = findUserByIdentifier(identifier);
 
         reviewValidator.validateReviewAuthorization(review, user);
@@ -64,7 +64,7 @@ public class ReviewService {
     }
 
     public void delete(long reviewId, String identifier) {
-        Review review = findReviewById(reviewId);
+        Review review = findReviewByIdWithUser(reviewId);
         User user = findUserByIdentifier(identifier);
         reviewValidator.validateReviewAuthorization(review, user);
         reviewRepository.delete(review);
@@ -85,8 +85,8 @@ public class ReviewService {
                 .orElseThrow(() -> new UserException(ErrorCodeAndMessage.NOT_FOUND_USER));
     }
 
-    private Review findReviewById(long reviewId) {
-        return reviewRepository.findById(reviewId)
+    private Review findReviewByIdWithUser(long reviewId) {
+        return reviewRepository.findByIdWithUser(reviewId)
                 .orElseThrow(() -> new ReviewException(ErrorCodeAndMessage.NOT_FOUND_REVIEW));
     }
 }

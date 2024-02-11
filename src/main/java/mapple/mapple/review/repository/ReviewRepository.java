@@ -17,9 +17,9 @@ import java.util.Optional;
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
-    @Override
     @EntityGraph(attributePaths = "user")
-    Optional<Review> findById(Long aLong);
+    @Query("select r from Review r where r.id = :reviewId")
+    Optional<Review> findByIdWithUser(@Param("reviewId") Long reviewId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select r from Review r where r.id = :reviewId")

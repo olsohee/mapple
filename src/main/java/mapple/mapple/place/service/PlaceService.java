@@ -54,7 +54,7 @@ public class PlaceService {
 
     public long update(CreateAndUpdatePlaceRequest dto, List<MultipartFile> files, long placeId, String identifier) throws IOException {
         User user = findUserByIdentifier(identifier);
-        Place place = findPlaceById(placeId);
+        Place place = findPlaceByIdWithUser(placeId);
 
         placeValidator.validatePlaceAuthorization(user, place);
 
@@ -68,7 +68,7 @@ public class PlaceService {
 
     public void delete(long placeId, String identifier) {
         User user = findUserByIdentifier(identifier);
-        Place place = findPlaceById(placeId);
+        Place place = findPlaceByIdWithUser(placeId);
         placeValidator.validatePlaceAuthorization(user, place);
         placeRepository.delete(place);
     }
@@ -83,8 +83,8 @@ public class PlaceService {
                 .orElseThrow(() -> new MeetingException(ErrorCodeAndMessage.NOT_FOUND_MEETING));
     }
 
-    private Place findPlaceById(long placeId) {
-        return placeRepository.findById(placeId)
+    private Place findPlaceByIdWithUser(long placeId) {
+        return placeRepository.findByIdWithUser(placeId)
                 .orElseThrow(() -> new PlaceException(ErrorCodeAndMessage.NOT_FOUND_PLACE));
     }
 }
