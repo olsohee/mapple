@@ -66,10 +66,11 @@ public class ReviewController {
     }
 
     @GetMapping("/reviews")
-    public ResponseEntity readReadableReviews(@PageableDefault(size = 5, page = 0, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+    public ResponseEntity readReviews(@PageableDefault(size = 5, page = 0, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+                                              @RequestParam(value = "keyword", required = false) String keyword,
                                               HttpServletRequest request) {
         String identifier = jwtUtils.getIdentifierFromHeader(request);
-        Page<ReadReviewListResponse> responseData = reviewQueryService.readReadableReviews(identifier, pageable);
+        Page<ReadReviewListResponse> responseData = reviewQueryService.readReviews(identifier, keyword, pageable);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new SuccessResponse("전체 리뷰 리스트 조회 성공", responseData));
     }

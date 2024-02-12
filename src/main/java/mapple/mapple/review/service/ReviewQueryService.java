@@ -51,9 +51,16 @@ public class ReviewQueryService {
         return new CreateAndUpdateReviewResponse(user, review, likeCount, createImagesByteList(review.getImages()));
     }
 
-    public Page<ReadReviewListResponse> readReadableReviews(String identifier, Pageable pageable) {
+    public Page<ReadReviewListResponse> readReviews(String identifier, String keyword, Pageable pageable) {
         User user = findUserByIdentifier(identifier);
-        Page<Review> pageResult = reviewRepository.findReadableReviews(pageable, user.getId());
+        Page<Review> pageResult;
+        if (keyword == null) {
+            pageResult = reviewRepository.findReviews(pageable, user.getId());
+
+        } else {
+            pageResult = reviewRepository.findReviewsWithKeyword(pageable, user.getId(), keyword);
+
+        }
         return pageResult.map(review -> new ReadReviewListResponse(review));
     }
 

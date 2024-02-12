@@ -36,7 +36,18 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             "or (r.user = f.toUser " + // 유저의 친구 리뷰이거나 (친구공개)
                 "and f.requestStatus = mapple.mapple.friend.entity.RequestStatus.ACCEPT " +
                 "and r.publicStatus = mapple.mapple.entity.PublicStatus.ONLY_FRIEND)")
-    Page<Review> findReadableReviews(Pageable pageable, @Param("userId") long userId);
+    Page<Review> findReviews(Pageable pageable, @Param("userId") long userId);
+
+    @EntityGraph(attributePaths = "user")
+    @Query("select r from Review r " +
+            "left outer join Friend f on f.fromUser.id = :userId " +
+            "where r.placeName like %:keyword% " +
+            "and (r.publicStatus = mapple.mapple.entity.PublicStatus.PUBLIC " + // 전체 공개이거나
+            "or r.user.id = :userId " + // 유저 자신의 리뷰이거나
+            "or (r.user = f.toUser " + // 유저의 친구 리뷰이거나 (친구공개)
+            "and f.requestStatus = mapple.mapple.friend.entity.RequestStatus.ACCEPT " +
+            "and r.publicStatus = mapple.mapple.entity.PublicStatus.ONLY_FRIEND))")
+    Page<Review> findReviewsWithKeyword(Pageable pageable, @Param("userId") long userId, @Param("keyword") String keyword);
 
     @EntityGraph(attributePaths = "user")
     @Query(value = "select r from Review r " +
