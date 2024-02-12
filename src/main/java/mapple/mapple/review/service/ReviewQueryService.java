@@ -13,6 +13,7 @@ import mapple.mapple.exception.customException.UserException;
 import mapple.mapple.review.entity.Review;
 import mapple.mapple.review.dto.CreateAndUpdateReviewResponse;
 import mapple.mapple.review.entity.ReviewImage;
+import mapple.mapple.review.entity.ReviewLike;
 import mapple.mapple.review.repository.ReviewLikeRepository;
 import mapple.mapple.review.repository.ReviewRepository;
 import mapple.mapple.user.entity.User;
@@ -76,6 +77,15 @@ public class ReviewQueryService {
         List<Review> reviews = reviewRepository.findByUserId(user.getId());
         return reviews.stream()
                 .map(review -> new ReadReviewListResponse(review))
+                .toList();
+    }
+
+    public List<ReadReviewListResponse> readLikeReviews(String identifier, Pageable pageable) {
+        User user = userRepository.findByIdentifier(identifier)
+                .orElseThrow(() -> new UserException(ErrorCodeAndMessage.NOT_FOUND_USER));
+        Page<ReviewLike> pageResult = reviewLikeRepository.findByUserIdWithReviewAndUser(pageable, user.getId());
+        return pageResult.stream()
+                .map(reviewLike -> new ReadReviewListResponse(reviewLike.getReview()))
                 .toList();
     }
 

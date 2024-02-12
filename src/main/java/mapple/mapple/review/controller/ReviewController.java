@@ -100,4 +100,13 @@ public class ReviewController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new SuccessResponse("좋아요 누르기/취소 성공", responseData));
     }
+
+    @GetMapping("/reviews/like")
+    public ResponseEntity readLikeReviews(@PageableDefault(size = 5, page = 0, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+                                          HttpServletRequest request) {
+        String identifier = jwtUtils.getIdentifierFromHeader(request);
+        List<ReadReviewListResponse> responseData = reviewQueryService.readLikeReviews(identifier, pageable);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new SuccessResponse("좋아요 누른 리뷰 리스트 조회 성공", responseData));
+    }
 }

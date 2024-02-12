@@ -2,11 +2,12 @@ package mapple.mapple.review.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import mapple.mapple.entity.BaseEntity;
 import mapple.mapple.user.entity.User;
 
 @Entity
 @Getter
-public class ReviewLike {
+public class ReviewLike extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
