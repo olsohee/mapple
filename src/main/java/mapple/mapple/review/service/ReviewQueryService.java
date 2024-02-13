@@ -53,20 +53,13 @@ public class ReviewQueryService {
 
     public Page<ReadReviewListResponse> readReviews(String identifier, String keyword, Pageable pageable) {
         User user = findUserByIdentifier(identifier);
-        Page<Review> pageResult;
-        if (keyword == null) {
-            pageResult = reviewRepository.findReviews(pageable, user.getId());
-
-        } else {
-            pageResult = reviewRepository.findReviewsWithKeyword(pageable, user.getId(), keyword);
-
-        }
+        Page<Review> pageResult = reviewRepository.findReviewsPage(keyword, user.getId(), pageable);
         return pageResult.map(review -> new ReadReviewListResponse(review));
     }
 
     public Page<ReadReviewListResponse> readFriendsReviews(String identifier, Pageable pageable) {
         User user = findUserByIdentifier(identifier);
-        Page<Review> pageResult = reviewRepository.findFriendReviewsByUserIdPage(pageable, user.getId());
+        Page<Review> pageResult = reviewRepository.findFriendReviewsPage(user.getId(), pageable);
         return pageResult.map(review -> new ReadReviewListResponse(review));
     }
 
