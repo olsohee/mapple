@@ -29,8 +29,8 @@
 - 따라서 검색어를 통한 조회는 별도의 api로 분리해서 네이티브 쿼리를 실행하도록 하고, 그 외의 조건 검색(좋아요 순, 최신 순으로 조회 등)은 Querydsl을 통해 실행되도록 한다.(Querydsl을
   사용함으로써 접근 권한 검증 로직을 메소드로 분리해서 재사용)
 - 이전에 full scan을 타는 조회에서 Full Text Search를 사용하도록 함으로써 조회 성능이 약 52% 향상(1370ms -> 665ms)되었다.
-<img width="139" alt="스크린샷 2024-02-15 오후 3 57 19" src="https://github.com/olsohee/mapple/assets/108605017/740e8dcd-c564-4d89-a450-179a5fe0340f">
-<img width="141" alt="스크린샷 2024-02-15 오후 3 57 25" src="https://github.com/olsohee/mapple/assets/108605017/e4b4c49b-3ec9-43dd-835f-d87f5c180c58">
+  <img width="139" alt="스크린샷 2024-02-15 오후 3 57 19" src="https://github.com/olsohee/mapple/assets/108605017/740e8dcd-c564-4d89-a450-179a5fe0340f">
+  <img width="141" alt="스크린샷 2024-02-15 오후 3 57 25" src="https://github.com/olsohee/mapple/assets/108605017/e4b4c49b-3ec9-43dd-835f-d87f5c180c58">
 
 ### OSIV 옵션과 커멘드와 쿼리의 분리
 
