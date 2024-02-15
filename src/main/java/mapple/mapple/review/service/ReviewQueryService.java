@@ -21,6 +21,7 @@ import mapple.mapple.user.repository.UserRepository;
 import mapple.mapple.validator.ReviewValidator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.FileCopyUtils;
@@ -45,15 +46,21 @@ public class ReviewQueryService {
     private final ReviewValidator reviewValidator;
 
     public CreateAndUpdateReviewResponse readCreatedUpdatedReview(long reviewId, String identifier) throws IOException {
-        Review review = findReviewById(reviewId);
+        Review review = findReviewWithUser(reviewId);
         User user = findUserByIdentifier(identifier);
         Long likeCount = reviewLikeRepository.countByReviewId(reviewId);
         return new CreateAndUpdateReviewResponse(user, review, likeCount, createImagesByteList(review.getImages()));
     }
 
-    public Page<ReadReviewListResponse> readReviews(String identifier, String keyword, Pageable pageable) {
+    public Page<ReadReviewListResponse> readReviews(String identifier, Pageable pageable) {
         User user = findUserByIdentifier(identifier);
-        Page<Review> pageResult = reviewRepository.findReviewsPage(keyword, user.getId(), pageable);
+        Page<Review> pageResult = reviewRepository.findReviewsPage(user.getId(), pageable);
+        return pageResult.map(review -> new ReadReviewListResponse(review));
+    }
+
+    public Page<ReadReviewListResponse> readReviewsSearch(String identifier, String keyword, Pageable pageable) {
+        User user = findUserByIdentifier(identifier);
+        Page<Review> pageResult = reviewRepository.findReviewsPageSearch(keyword, user.getId(), pageable);
         return pageResult.map(review -> new ReadReviewListResponse(review));
     }
 
@@ -64,7 +71,7 @@ public class ReviewQueryService {
     }
 
     public ReadReviewResponse readOne(long reviewId, String identifier) throws IOException {
-        Review review = findReviewById(reviewId);
+        Review review = findReviewWithUser(reviewId);
         User user = findUserByIdentifier(identifier);
         List<Friend> friends = friendRepository.findFriendsByUser(user, RequestStatus.ACCEPT);
         reviewValidator.validateCanRead(review, user, friends);
@@ -94,8 +101,8 @@ public class ReviewQueryService {
                 .orElseThrow(() -> new UserException(ErrorCodeAndMessage.NOT_FOUND_USER));
     }
 
-    private Review findReviewById(long reviewId) {
-        return reviewRepository.findById(reviewId)
+    private Review findReviewWithUser(long reviewId) {
+        return reviewRepository.findByIdWithUser(reviewId)
                 .orElseThrow(() -> new ReviewException(ErrorCodeAndMessage.NOT_FOUND_REVIEW));
     }
 

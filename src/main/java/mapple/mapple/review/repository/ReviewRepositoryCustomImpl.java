@@ -31,14 +31,13 @@ public class ReviewRepositoryCustomImpl implements ReviewRepositoryCustom {
     }
 
     @Override
-    public Page<Review> findReviewsPage(String keyword, Long userId, Pageable pageable) {
+    public Page<Review> findReviewsPage(Long userId, Pageable pageable) {
         JPAQuery<Review> query = queryFactory
                 .selectFrom(review)
                 .join(review.user, user).fetchJoin()
                 .leftJoin(friend).on(friend.fromUser.id.eq(userId))
                 .where(
-                        accessible(friend, review, userId),
-                        containKeyword(review, keyword));
+                        accessible(friend, review, userId));
 
         setOrder(query, review, pageable);
         QueryResults<Review> results = query.fetchResults();
@@ -70,10 +69,6 @@ public class ReviewRepositoryCustomImpl implements ReviewRepositoryCustom {
         return review.user.id.eq(friend.toUser.id) // 유저 친구 리뷰글이면서
                 .and(friend.requestStatus.eq(RequestStatus.ACCEPT)) // 친구 상태가 ACCEPT 이면서
                 .and(review.publicStatus.ne(PublicStatus.PRIVATE)); // 비공개가 아닌 경우
-    }
-
-    private Predicate containKeyword(QReview review, String keyword) {
-        return keyword != null ? review.placeName.contains(keyword) : null;
     }
 
     private void setOrder(JPAQuery<Review> query, QReview review, Pageable pageable) {

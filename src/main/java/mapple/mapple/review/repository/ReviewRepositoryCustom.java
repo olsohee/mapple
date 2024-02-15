@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface ReviewRepositoryCustom {
 
-    Page<Review> findReviewsPage(String keyword, Long userId, Pageable pageable);
+    Page<Review> findReviewsPage(Long userId, Pageable pageable);
 
     Page<Review> findFriendReviewsPage(Long userId, Pageable pageable);
 }
