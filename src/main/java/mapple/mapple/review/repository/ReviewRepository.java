@@ -37,4 +37,6 @@ public interface ReviewRepository extends ReviewRepositoryCustom, JpaRepository<
             "or (r.public_status = 'ONLY_FRIEND' and f.request_status = 'ACCEPT'))", // 친구의 리뷰
             nativeQuery = true)
     Page<Review> findReviewsPageSearch(@Param("keyword") String keyword, @Param("userId") long userId, Pageable pageable);
+
+    List<Review> findTop5ByOrderByLikeCountDesc();
 }

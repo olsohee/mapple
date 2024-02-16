@@ -119,4 +119,12 @@ public class ReviewController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new SuccessResponse("좋아요 누른 리뷰 리스트 조회 성공", responseData));
     }
+
+    // PUBLIC 글 중 좋아요 수 많은 상위 5개 글 읽기
+    @GetMapping("/reviews/best")
+    public ResponseEntity readBestReviews() {
+        List<ReadReviewListResponse> responseData = reviewQueryService.readBestReviews();
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new SuccessResponse("인기글 조회 성공", responseData));
+    }
 }

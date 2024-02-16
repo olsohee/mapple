@@ -21,7 +21,6 @@ import mapple.mapple.user.repository.UserRepository;
 import mapple.mapple.validator.ReviewValidator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.FileCopyUtils;
@@ -93,6 +92,12 @@ public class ReviewQueryService {
         Page<ReviewLike> pageResult = reviewLikeRepository.findByUserIdWithReviewAndUser(pageable, user.getId());
         return pageResult.stream()
                 .map(reviewLike -> new ReadReviewListResponse(reviewLike.getReview()))
+                .toList();
+    }
+
+    public List<ReadReviewListResponse> readBestReviews() {
+        return reviewRepository.findTop5ByOrderByLikeCountDesc().stream()
+                .map(review -> new ReadReviewListResponse(review))
                 .toList();
     }
 
