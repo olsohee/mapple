@@ -4,10 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import mapple.mapple.SuccessResponse;
 import mapple.mapple.jwt.JwtUtils;
-import mapple.mapple.review.dto.CreateAndUpdateReviewRequest;
-import mapple.mapple.review.dto.CreateAndUpdateReviewResponse;
-import mapple.mapple.review.dto.ReadReviewListResponse;
-import mapple.mapple.review.dto.ReadReviewResponse;
+import mapple.mapple.review.dto.*;
 import mapple.mapple.review.service.ReviewQueryService;
 import mapple.mapple.review.service.ReviewService;
 import org.springframework.data.domain.Page;
@@ -21,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -47,7 +45,7 @@ public class ReviewController {
     public ResponseEntity update(@Validated @RequestPart CreateAndUpdateReviewRequest dto,
                                  @RequestPart(required = false) List<MultipartFile> files,
                                  @PathVariable("reviewId") long reviewId,
-                                 HttpServletRequest request) throws IOException {
+                                 HttpServletRequest request) throws IOException, ClassNotFoundException {
         String identifier = jwtUtils.getIdentifierFromHeader(request);
         reviewService.update(reviewId, identifier, dto, files);
         CreateAndUpdateReviewResponse responseData = reviewQueryService.readCreatedUpdatedReview(reviewId, identifier);
@@ -57,7 +55,7 @@ public class ReviewController {
     }
 
     @DeleteMapping("/review/{reviewId}")
-    public ResponseEntity delete(@PathVariable("reviewId") long reviewId, HttpServletRequest request) {
+    public ResponseEntity delete(@PathVariable("reviewId") long reviewId, HttpServletRequest request) throws IOException, ClassNotFoundException {
         String identifier = jwtUtils.getIdentifierFromHeader(request);
         reviewService.delete(reviewId, identifier);
         return ResponseEntity.status(HttpStatus.OK)
@@ -120,10 +118,10 @@ public class ReviewController {
                 .body(new SuccessResponse("좋아요 누른 리뷰 리스트 조회 성공", responseData));
     }
 
-    // PUBLIC 글 중 좋아요 수 많은 상위 5개 글 읽기
     @GetMapping("/reviews/best")
     public ResponseEntity readBestReviews() {
-        List<ReadReviewListResponse> responseData = reviewQueryService.readBestReviews();
+        int hour = LocalDateTime.now().getHour();
+        List<ReadReviewListResponse> responseData = reviewQueryService.readBestReviews(hour);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new SuccessResponse("인기글 조회 성공", responseData));
     }

@@ -38,5 +38,9 @@ public interface ReviewRepository extends ReviewRepositoryCustom, JpaRepository<
             nativeQuery = true)
     Page<Review> findReviewsPageSearch(@Param("keyword") String keyword, @Param("userId") long userId, Pageable pageable);
 
-    List<Review> findTop5ByOrderByLikeCountDesc();
+    @Query("select r from Review r " +
+            "where r.publicStatus = 'PUBLIC' " +
+            "order by r.likeCount desc " +
+            "limit 5")
+    List<Review> findTop5ByOrderByLikeCountDescOnlyPublic();
 }

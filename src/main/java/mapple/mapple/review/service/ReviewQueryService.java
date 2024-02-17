@@ -7,6 +7,7 @@ import mapple.mapple.exception.customException.ReviewException;
 import mapple.mapple.friend.entity.Friend;
 import mapple.mapple.friend.entity.RequestStatus;
 import mapple.mapple.friend.repository.FriendRepository;
+import mapple.mapple.redis.RedisCacheManager;
 import mapple.mapple.review.dto.ReadReviewListResponse;
 import mapple.mapple.review.dto.ReadReviewResponse;
 import mapple.mapple.exception.customException.UserException;
@@ -19,8 +20,10 @@ import mapple.mapple.review.repository.ReviewRepository;
 import mapple.mapple.user.entity.User;
 import mapple.mapple.user.repository.UserRepository;
 import mapple.mapple.validator.ReviewValidator;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.FileCopyUtils;
@@ -43,6 +46,8 @@ public class ReviewQueryService {
     private final UserRepository userRepository;
     private final FriendRepository friendRepository;
     private final ReviewValidator reviewValidator;
+    private final RedisTemplate redisTemplate;
+    private final RedisCacheManager redisCacheManager;
 
     public CreateAndUpdateReviewResponse readCreatedUpdatedReview(long reviewId, String identifier) throws IOException {
         Review review = findReviewWithUser(reviewId);
@@ -95,8 +100,9 @@ public class ReviewQueryService {
                 .toList();
     }
 
-    public List<ReadReviewListResponse> readBestReviews() {
-        return reviewRepository.findTop5ByOrderByLikeCountDesc().stream()
+    @Cacheable(cacheNames = "best_reviews", key = "#hour")
+    public  List<ReadReviewListResponse> readBestReviews(int hour) {
+        return reviewRepository.findTop5ByOrderByLikeCountDescOnlyPublic().stream()
                 .map(review -> new ReadReviewListResponse(review))
                 .toList();
     }

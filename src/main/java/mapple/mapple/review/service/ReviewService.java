@@ -5,7 +5,9 @@ import mapple.mapple.entity.PublicStatus;
 import mapple.mapple.exception.ErrorCodeAndMessage;
 import mapple.mapple.exception.customException.ReviewException;
 import mapple.mapple.exception.customException.UserException;
+import mapple.mapple.redis.RedisCacheManager;
 import mapple.mapple.review.dto.CreateAndUpdateReviewRequest;
+import mapple.mapple.review.dto.ReadReviewListResponse;
 import mapple.mapple.review.entity.Rating;
 import mapple.mapple.review.entity.Review;
 import mapple.mapple.review.repository.ReviewRepository;
@@ -17,7 +19,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Transactional
@@ -28,6 +33,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final ReviewValidator reviewValidator;
+    private final RedisCacheManager redisCacheManager;
 
     @Value("${file.dir.review_image}")
     private String reviewImageFileDir;
@@ -45,7 +51,9 @@ public class ReviewService {
         return review.getId();
     }
 
-    public long update(long reviewId, String identifier, CreateAndUpdateReviewRequest dto, List<MultipartFile> files) throws IOException {
+    public long update(long reviewId, String identifier, CreateAndUpdateReviewRequest dto, List<MultipartFile> files) throws IOException, ClassNotFoundException {
+        checkBestReviewsCache(reviewId);
+
         Review review = findReviewByIdWithUser(reviewId);
         User user = findUserByIdentifier(identifier);
 
@@ -63,11 +71,28 @@ public class ReviewService {
         return reviewId;
     }
 
-    public void delete(long reviewId, String identifier) {
+    public void delete(long reviewId, String identifier) throws IOException, ClassNotFoundException {
+        checkBestReviewsCache(reviewId);
         Review review = findReviewByIdWithUser(reviewId);
         User user = findUserByIdentifier(identifier);
         reviewValidator.validateReviewAuthorization(review, user);
         reviewRepository.delete(review);
+    }
+
+    private void checkBestReviewsCache(long reviewId) throws IOException, ClassNotFoundException {
+        int hour = LocalDateTime.now().getHour();
+        byte[] savedDataInCache = redisCacheManager.getBestReviewsFromCache(hour);
+        if (savedDataInCache != null) {
+            ObjectInputStream objectInputStream = new ObjectInputStream(new ByteArrayInputStream(savedDataInCache));
+            if (isContainReviewInCache((List<ReadReviewListResponse>) objectInputStream.readObject(), reviewId)) {
+                redisCacheManager.delete(hour);
+            }
+        }
+    }
+
+    private boolean isContainReviewInCache(List<ReadReviewListResponse> readReviewListResponses, long reviewId) {
+        return readReviewListResponses.stream()
+                .anyMatch(readReviewListResponse -> readReviewListResponse.getReviewId() == reviewId);
     }
 
     public void like(long reviewId, String identifier) {
