@@ -8,7 +8,7 @@ import org.springframework.data.redis.core.RedisHash;
 
 @Getter @Setter
 @AllArgsConstructor
-@RedisHash(value = "identifier", timeToLive = 60 * 60) // TTL = 60분
+@RedisHash(value = "identifier", timeToLive = 60 * 60 * 24 * 30) // TTL = 30일
 public class RefreshToken {
 
     @Id
