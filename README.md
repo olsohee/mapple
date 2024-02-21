@@ -1,73 +1,166 @@
 # Mapple (마이 플레이스, 마플)
 
-## 주요 이슈
+## 프로젝트 소개
 
-### OAuth2.0을 통한 인증 기능 구현 + Spring Security/JWT를 통한 인증/인가 구현
-- OAuth2.0을 통해 네이버/카카오를 통한 인증 기능을 구현했습니다.
-- 인증이 완료된 사용자에게는 JWT를 발급합니다.
-- 로그인 검증을 위해 JWT 검증은 JwtFilter라는 커스텀 필터에서 진행됩니다. 
-- 잘못된 JWT 또는 유효하지 않는 JWT가 넘어올 시 예외가 발생하고 이 예외는 ControllerAdvice에서 처리됩니다.
+### 참여 인원
 
-### 예외 처리
-- 컨트롤러로 넘어오는 예외 뿐만 아니라 Spring Security Filter Chain에서 발생한 예외와 JWT 관련 예외는 모두 Controller Advice에서 처리됩니다.
-- 응답 코드, HTTP 상태 코드, 예외 메시지 등 예외 응답 형식에 맞게 응답이 나갑니다.
-- 예외에 따라 스프링의 MessageSource를 통해 적절한 예외 메시지가 응답으로 나갑니다. 이 예외 메시지는 error_messages.properties 파일 한 곳에서 모아 관리됩니다.
+1명 (개인 프로젝트)
 
-### 페치 조인 적용
-- Review 조회 시 리뷰를 작성한 사용자에 대한 정보도 항상 함께 응답이 나갑니다.
-- 따라서 지연로딩으로 인한 N + 1 문제를 해결하기 위해 페치 조인을 적용했습니다.
+### 프로젝트 기간
 
-### Querydsl의 사용
+2024.01 ~
 
-#### 스프링 데이터 JPA만 사용했을 때의 문제점
+### 프로젝트 설명
 
-- 리뷰 글을 조회할 때 해당 글에 대한 접근 권한이 있는지 매번 @Query 어노테이션을 통해 JPQL을 직접 작성해주어야 한다. 따라서 중복된 로직이더라도 매번 JPQL을 작성하고 관리해주어야 한다.
-  <img width="975" alt="스크린샷 2024-02-13 오후 4 23 25" src="https://github.com/olsohee/mapple/assets/108605017/d030c4dd-57d5-41cb-81d2-09ba09b408fc">
-- 서비스 계층에서는 검색 조건이 있을 때와 없을 때를 구분해서 리포지토리의 메소드를 호출해야 한다.
-  <img width="847" alt="스크린샷 2024-02-13 오후 4 20 44" src="https://github.com/olsohee/mapple/assets/108605017/6cc48cea-6f30-4081-9fc6-4f70a2f0f29b">
-- JPQL을 직접 작성할 때 오타가 있더라도 컴파일 시점에 발견되지 않는다.
+방문했던 장소에 대한 리뷰 글을 작성할 수 있으며, 다음에 방문하고 싶은 장소를 친구들과 모임을 생성하여 함께 기록할 수 있는 서비스입니다.
 
-#### Querydsl을 통해 문제 해결
+#### 사용자 관련 기능
 
-- 인터페이스(ReviewRepository)가 아닌 Querydsl을 사용하기 위한 별도의 클래스를 생성하고, 이곳에서 접근 권한에 대한 로직을 별도의 메소드로 뽑아서 사용할 수 있다.
-  <img width="770" alt="스크린샷 2024-02-13 오후 4 30 18" src="https://github.com/olsohee/mapple/assets/108605017/e2018ca5-92eb-48b7-b68b-bd51249c8ffd">
-- Querydsl을 사용하여 동적 쿼리를 하나의 메소드로 해결할 수 있다.
-  <img width="838" alt="스크린샷 2024-02-13 오후 4 24 49" src="https://github.com/olsohee/mapple/assets/108605017/b6cbc038-098f-476d-8b79-9809e8a47ea6">
-- Querydsl을 사용하여 오타가 발생해도 컴파일 시점에 발견된다.
+- 회원가입
+- 로그인 (기본 로그인, 카카오/네이버 로그인)
 
-### MySQL의 Full Text Search 사용
+#### 리뷰 관련 기능
 
-- 검색어를 통한 리뷰 글 조회 시 데이터베이스에서 full scan을 하는 문제가 발생했다. 이는 like 연산자가 %_%인 경우 인덱스를 걸어도 인덱스를 타지 않기 때문이다.
-- 따라서 MySQL의 Full Text Search를 사용했다.
-- 이를 위해서는 match ... against ... 이라는 MySQL에 종속적인 문법을 사용해야 한다. 따라서 네이티브 쿼리로 작성해주었다.
-  <img width="956" alt="image" src="https://github.com/olsohee/mapple/assets/108605017/0ddb7e1e-fb03-4462-8ef3-6154056f66a7">
-- 따라서 검색어를 통한 조회는 별도의 api로 분리해서 네이티브 쿼리를 실행하도록 하고, 그 외의 조건 검색(좋아요 순, 최신 순으로 조회 등)은 Querydsl을 통해 실행되도록 한다.(Querydsl을
-  사용함으로써 접근 권한 검증 로직을 메소드로 분리해서 재사용)
-- 이전에 full scan을 타는 조회에서 Full Text Search를 사용하도록 함으로써 조회 성능이 약 52% 향상(1370ms -> 665ms)되었다.
-  <img width="139" alt="스크린샷 2024-02-15 오후 3 57 19" src="https://github.com/olsohee/mapple/assets/108605017/740e8dcd-c564-4d89-a450-179a5fe0340f">
-  <img width="141" alt="스크린샷 2024-02-15 오후 3 57 25" src="https://github.com/olsohee/mapple/assets/108605017/e4b4c49b-3ec9-43dd-835f-d87f5c180c58">
+- 리뷰 글 CRUD
+- 좋아요 등록 / 취소
 
-### OSIV 옵션과 커멘드와 쿼리의 분리
+#### 친구 관련 기능
 
-- OSIV 옵션을 키면 프레젠테이션 계층에서도 영속성 컨텍스트가 살아있게 되고 커넥션이 유지된다.
-    - 따라서 커넥션 낭비를 막기 위해 OSIV 옵션을 껐다.
-- 대신 트랜잭션 밖에서 영속성 컨텍스트가 닫히므로, 지연로딩이 불가하다.
-    - 따라서 트랜잭션 내(서비스 계층)에서 필요한 데이터를 모두 로딩해서 DTO 형태로 반환한다.
-- 그런데 이로 인해 서비스 계층에 주요 비즈니스 로직과 DTO 변환 코드(컨트롤러가 필요로 하는 데이터 조회 코드)가 섞이게 된다.
-    - 따라서 핵심 비즈니스 로직을 담당하는 서비스 계층(ReviewRepository)와 조회용 서비스 계층(ReviewQueryService)을 분리했다.
+- 친구 요청 / 수락 / 거절
 
-### 동시성 상황에서 데이터 정합성 문제
+#### 모임, 플레이스 관련 기능
 
-- 동시에 같은 사용자가 좋아요를 누르는 경우와 동시에 여러 사용자가 좋아요를 누르는 경우 데이터 정합설 문제가 발생했다.
-- 따라서 비관적 락을 통해 이를 해결했다.
+- 친구들과의 모임 생성
+- 다음에 갈 장소(플레이스) CRUD
 
-### Redis를 이용한 캐싱을 통해 인기글 조회 성능 향상
+### 실행 예시
 
-- 조회가 빈번하고 업데이트가 적은 데이터인, 인기글 조회 기능에 캐싱 기능 도입
-- 캐싱 없이 조회했을 때에 비해 캐싱을 적용한 후 조회 성능 약 58% 상승 (766ms -> 322ms)
-  <img width="133" alt="스크린샷 2024-02-16 오후 6 41 39" src="https://github.com/olsohee/mapple/assets/108605017/e1ca08d5-c24e-4b0e-8247-7f8dd0773df4">
-  <img width="136" alt="스크린샷 2024-02-16 오후 7 00 41" src="https://github.com/olsohee/mapple/assets/108605017/383e6eb7-c886-4c5d-ba32-caaf36eacc7f">
-- 리뷰 글의 좋아요 수가 높은 5개가 인기글로 보여진다.
-- 인기글을 조회하면 해당 시간의 인기글 데이터가 Redis에 저장되어 있는지 우선 확인하고, 없을 경우에 RDB에 select 쿼리가 실행된다.
-- Redis에 캐싱된 데이터는 TTL 설정을 통해 1시간 이후에 자동 삭제된다.
-- 만약 인기글에 등록된 게시글이 update/delete되면 Redis에 캐싱된 데이터는 삭제된다. 따라서 인기글에 등록된 게시글이 update/delete되더라도 즉각적으로 변경된 내용이 조회된다.
+더 자세한 예시와 설명은 API 문서 참고 (https://documenter.getpostman.com/view/25391549/2s9Yytg11m)
+
+#### 로그인 시 응답
+
+```
+{
+    "message": "사용자 로그인 성공",
+    "data": {
+        "accessToken": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyMUBuYXZlci5jb20iLCJpYXQiOjE3MDgyMzkxMTEsImV4cCI6MTcwODI0MDkxMX0.sSOsmv3rSNBv3kkxzUMGHcERKIa4K2j1oBsw2kuyZn4",
+        "refreshToken": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyMUBuYXZlci5jb20iLCJpYXQiOjE3MDgyMzkxMTEsImV4cCI6MTcwODI0MjcxMX0.vbZMnLnzSd7rSqLYihoWT_r_aogEtQO6hZAz4EwcecE"
+    }
+}
+```
+
+#### 리뷰 리스트 조회 시 응답
+
+```
+{
+    "message": "전체 리뷰 리스트 조회 성공",
+    "data": {
+        "content": [
+            {
+                "reviewId": 999,
+                "username": "user999",
+                "placeName": "zeuhxqzefl",
+                "rating": "FIVE",
+                "likeCount": 0,
+                "createdAt": "2024-02-19T14:20:42.465291",
+                "updatedAt": "2024-02-19T14:20:42.465291"
+            },
+            {
+                "reviewId": 996,
+                "username": "user996",
+                "placeName": "kzspjvsouw",
+                "rating": "FIVE",
+                "likeCount": 0,
+                "createdAt": "2024-02-19T14:20:42.462833",
+                "updatedAt": "2024-02-19T14:20:42.462833"
+            },
+            {
+                "reviewId": 993,
+                "username": "user993",
+                "placeName": "gnzgcdewdg",
+                "rating": "FIVE",
+                "likeCount": 0,
+                "createdAt": "2024-02-19T14:20:42.460571",
+                "updatedAt": "2024-02-19T14:20:42.460571"
+            },
+            {
+                "reviewId": 990,
+                "username": "user990",
+                "placeName": "vhiqjgsmsn",
+                "rating": "FIVE",
+                "likeCount": 0,
+                "createdAt": "2024-02-19T14:20:42.458319",
+                "updatedAt": "2024-02-19T14:20:42.458319"
+            },
+            {
+                "reviewId": 987,
+                "username": "user987",
+                "placeName": "ryvowqfobr",
+                "rating": "FIVE",
+                "likeCount": 0,
+                "createdAt": "2024-02-19T14:20:42.455281",
+                "updatedAt": "2024-02-19T14:20:42.455281"
+            }
+        ],
+        "pageable": {
+            "pageNumber": 0,
+            "pageSize": 5,
+            "sort": {
+                "empty": false,
+                "sorted": true,
+                "unsorted": false
+            },
+            "offset": 0,
+            "paged": true,
+            "unpaged": false
+        },
+        "last": false,
+        "totalPages": 67,
+        "totalElements": 334,
+        "first": true,
+        "size": 5,
+        "number": 0,
+        "sort": {
+            "empty": false,
+            "sorted": true,
+            "unsorted": false
+        },
+        "numberOfElements": 5,
+        "empty": false
+    }
+}
+```
+
+#### 친구 요청 성공 시 응답
+
+```
+{
+    "message": "친구 요청 성공",
+    "data": {
+        "fromUsername": "user1",
+        "toUsername": "user2",
+        "requestStatus": "REQUEST"
+    }
+}
+```
+
+## 기술 스택
+
+<img src="https://img.shields.io/badge/Spring-6DB33F?style=plastic&logo=spring&logoColor=white"> 
+
+<img src="https://img.shields.io/badge/Spring Boot-6DB33F?style=plastic&logo=springboot&logoColor=white"> 
+
+<img src="https://img.shields.io/badge/Spring Security-6DB33F?style=plastic&logo=springsecurity&logoColor=white">
+
+<img src="https://img.shields.io/badge/OAuth-EB5424?style=plastic&logo=auth0&logoColor=white"> </br>
+
+<img src="https://img.shields.io/badge/Hibernate-59666C?style=plastic&logo=hibernate&logoColor=white">
+
+<img src="https://img.shields.io/badge/Querydsl-1E8CBE?style=plastic&logoColor=white">
+
+<img src="https://img.shields.io/badge/Redis-DC382D?style=plastic&logo=redis&logoColor=white"> 
+
+<img src="https://img.shields.io/badge/MySQL-4479A1?style=plastic&logo=mysql&logoColor=white">
+
+## ERD 
+![image](https://github.com/olsohee/mapple/assets/108605017/097e21dc-30cd-4d44-bdbf-d5cf1780695a)
