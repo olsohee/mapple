@@ -146,21 +146,9 @@
 
 ## 기술 스택
 
-<img src="https://img.shields.io/badge/Spring-6DB33F?style=plastic&logo=spring&logoColor=white"> 
+<img src="https://img.shields.io/badge/Spring-6DB33F?style=plastic&logo=spring&logoColor=white"> <img src="https://img.shields.io/badge/Spring Boot-6DB33F?style=plastic&logo=springboot&logoColor=white"> <img src="https://img.shields.io/badge/Spring Security-6DB33F?style=plastic&logo=springsecurity&logoColor=white"> <img src="https://img.shields.io/badge/OAuth-EB5424?style=plastic&logo=auth0&logoColor=white"> </br>
 
-<img src="https://img.shields.io/badge/Spring Boot-6DB33F?style=plastic&logo=springboot&logoColor=white"> 
-
-<img src="https://img.shields.io/badge/Spring Security-6DB33F?style=plastic&logo=springsecurity&logoColor=white">
-
-<img src="https://img.shields.io/badge/OAuth-EB5424?style=plastic&logo=auth0&logoColor=white"> </br>
-
-<img src="https://img.shields.io/badge/Hibernate-59666C?style=plastic&logo=hibernate&logoColor=white">
-
-<img src="https://img.shields.io/badge/Querydsl-1E8CBE?style=plastic&logoColor=white">
-
-<img src="https://img.shields.io/badge/Redis-DC382D?style=plastic&logo=redis&logoColor=white"> 
-
-<img src="https://img.shields.io/badge/MySQL-4479A1?style=plastic&logo=mysql&logoColor=white">
+<img src="https://img.shields.io/badge/Hibernate-59666C?style=plastic&logo=hibernate&logoColor=white"> <img src="https://img.shields.io/badge/Querydsl-1E8CBE?style=plastic&logoColor=white"> <img src="https://img.shields.io/badge/Redis-DC382D?style=plastic&logo=redis&logoColor=white"> <img src="https://img.shields.io/badge/MySQL-4479A1?style=plastic&logo=mysql&logoColor=white">
 
 ## ERD 
 ![image](https://github.com/olsohee/mapple/assets/108605017/097e21dc-30cd-4d44-bdbf-d5cf1780695a)
