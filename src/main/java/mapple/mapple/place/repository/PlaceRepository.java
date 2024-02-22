@@ -15,8 +15,10 @@ import java.util.Optional;
 public interface PlaceRepository extends JpaRepository<Place, Long> {
 
     @EntityGraph(attributePaths = "user")
-    @Query("select p from Place p where p.user.id = :userId")
-    Optional<Place> findByIdWithUser(@Param("userId") Long userId);
+    @Query("select p from Place p " +
+            "join fetch p.user u " +
+            "where p.id = :placeId")
+    Optional<Place> findByIdWithUser(@Param("placeId") Long placeId);
 
     @EntityGraph(attributePaths = "user")
     @Query("select p from Place p " +
