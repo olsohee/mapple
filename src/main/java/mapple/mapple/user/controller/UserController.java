@@ -22,17 +22,17 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/join")
-    public ResponseEntity join(@Validated @RequestBody JoinRequest dto) {
-        JoinResponse responseData = userService.join(dto);
+    public ResponseEntity join(@Validated @RequestBody JoinRequest requestData) {
+        JoinResponse responseData = userService.join(requestData);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(new SuccessResponse("회원가입 성공", responseData));
+                .body(new SuccessResponse("사용자 회원가입 성공", responseData));
     }
 
     @PostMapping("/login")
-    public ResponseEntity login(@Validated @RequestBody LoginRequest dto) {
-        JwtDto responseData = userService.login(dto);
+    public ResponseEntity login(@Validated @RequestBody LoginRequest requestData) {
+        JwtDto responseData = userService.login(requestData);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(new SuccessResponse("로그인 성공", responseData));
+                .body(new SuccessResponse("사용자 로그인 성공", responseData));
     }
 
     @GetMapping("/login/oauth")

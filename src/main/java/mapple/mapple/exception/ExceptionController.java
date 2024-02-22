@@ -20,7 +20,8 @@ public class ExceptionController {
     @ExceptionHandler
     public ResponseEntity handleBusinessException(BusinessException e) {
         ErrorCodeAndMessage responseFormat = e.getResponseFormat();
-        ErrorCode errorCode = e.getResponseFormat().getErrorCode();
+        ErrorCode errorCode = responseFormat.getErrorCode();
+
         ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), responseFormat.getMessage());
         return ResponseEntity
                 .status(errorCode.getHttpStatus())
@@ -41,7 +42,8 @@ public class ExceptionController {
     @ExceptionHandler
     public ResponseEntity handleJwtException(CustomJwtException e) {
         ErrorCodeAndMessage responseFormat = e.getResponseFormat();
-        ErrorCode errorCode = e.getResponseFormat().getErrorCode();
+        ErrorCode errorCode = responseFormat.getErrorCode();
+
         ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), responseFormat.getMessage());
         return ResponseEntity
                 .status(errorCode.getHttpStatus())

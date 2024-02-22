@@ -79,6 +79,9 @@ public class ReviewService {
         reviewRepository.delete(review);
     }
 
+    /**
+     * 리뷰 글 update / delete 전에 캐싱된 데이터가 있으면 제거
+     */
     private void checkBestReviewsCache(long reviewId) throws IOException, ClassNotFoundException {
         int hour = LocalDateTime.now().getHour();
         byte[] savedDataInCache = redisCacheManager.getBestReviewsFromCache(hour);

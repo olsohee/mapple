@@ -46,8 +46,6 @@ public class ReviewQueryService {
     private final UserRepository userRepository;
     private final FriendRepository friendRepository;
     private final ReviewValidator reviewValidator;
-    private final RedisTemplate redisTemplate;
-    private final RedisCacheManager redisCacheManager;
 
     public CreateAndUpdateReviewResponse readCreatedUpdatedReview(long reviewId, String identifier) throws IOException {
         Review review = findReviewWithUser(reviewId);
@@ -79,7 +77,7 @@ public class ReviewQueryService {
         User user = findUserByIdentifier(identifier);
         List<Friend> friends = friendRepository.findFriendsByUser(user, RequestStatus.ACCEPT);
         reviewValidator.validateCanRead(review, user, friends);
-        return new ReadReviewResponse(user, review, createImagesByteList(review.getImages()));
+        return new ReadReviewResponse(review, createImagesByteList(review.getImages()));
     }
 
     public List<ReadReviewListResponse> readAllByUserIdentifier(String identifier) {

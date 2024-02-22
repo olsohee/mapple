@@ -30,11 +30,11 @@ public class ReviewController {
     private final JwtUtils jwtUtils;
 
     @PostMapping("/review")
-    public ResponseEntity create(@Validated @RequestPart CreateAndUpdateReviewRequest dto,
+    public ResponseEntity create(@Validated @RequestPart CreateAndUpdateReviewRequest requestData,
                                  @RequestPart(required = false) List<MultipartFile> files,
                                  HttpServletRequest request) throws IOException {
         String identifier = jwtUtils.getIdentifierFromHeader(request);
-        long savedReviewId = reviewService.create(dto, files, identifier);
+        long savedReviewId = reviewService.create(requestData, files, identifier);
         CreateAndUpdateReviewResponse responseData = reviewQueryService.readCreatedUpdatedReview(savedReviewId, identifier);
 
         return ResponseEntity.status(HttpStatus.OK)
@@ -42,12 +42,12 @@ public class ReviewController {
     }
 
     @PutMapping("/review/{reviewId}")
-    public ResponseEntity update(@Validated @RequestPart CreateAndUpdateReviewRequest dto,
+    public ResponseEntity update(@Validated @RequestPart CreateAndUpdateReviewRequest requestData,
                                  @RequestPart(required = false) List<MultipartFile> files,
                                  @PathVariable("reviewId") long reviewId,
                                  HttpServletRequest request) throws IOException, ClassNotFoundException {
         String identifier = jwtUtils.getIdentifierFromHeader(request);
-        reviewService.update(reviewId, identifier, dto, files);
+        reviewService.update(reviewId, identifier, requestData, files);
         CreateAndUpdateReviewResponse responseData = reviewQueryService.readCreatedUpdatedReview(reviewId, identifier);
 
         return ResponseEntity.status(HttpStatus.OK)
@@ -79,7 +79,7 @@ public class ReviewController {
         String identifier = jwtUtils.getIdentifierFromHeader(request);
         Page<ReadReviewListResponse> responseData = reviewQueryService.readReviewsSearch(identifier, keyword, pageable);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(new SuccessResponse("리뷰 검색 조회 성공", responseData));
+                .body(new SuccessResponse("검색어를 통한 리뷰 리스트 조회 성공", responseData));
     }
 
     @GetMapping("/reviews/friend")
@@ -88,7 +88,7 @@ public class ReviewController {
         String identifier = jwtUtils.getIdentifierFromHeader(request);
         Page<ReadReviewListResponse> responseData = reviewQueryService.readFriendsReviews(identifier, pageable);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(new SuccessResponse("친구 리뷰 리스트 조회 성공", responseData));
+                .body(new SuccessResponse("친구의 리뷰 리스트 조회 성공", responseData));
     }
 
     @GetMapping("/review/{reviewId}")
@@ -106,7 +106,7 @@ public class ReviewController {
 
         ReadReviewResponse responseData = reviewQueryService.readOne(reviewId, identifier);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(new SuccessResponse("좋아요 누르기/취소 성공", responseData));
+                .body(new SuccessResponse("좋아요 등록/삭제 성공", responseData));
     }
 
     @GetMapping("/reviews/like")
@@ -115,7 +115,7 @@ public class ReviewController {
         String identifier = jwtUtils.getIdentifierFromHeader(request);
         List<ReadReviewListResponse> responseData = reviewQueryService.readLikeReviews(identifier, pageable);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(new SuccessResponse("좋아요 누른 리뷰 리스트 조회 성공", responseData));
+                .body(new SuccessResponse("좋아요를 누른 리뷰 리스트 조회 성공", responseData));
     }
 
     @GetMapping("/reviews/best")
@@ -123,6 +123,6 @@ public class ReviewController {
         int hour = LocalDateTime.now().getHour();
         List<ReadReviewListResponse> responseData = reviewQueryService.readBestReviews(hour);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(new SuccessResponse("인기글 조회 성공", responseData));
+                .body(new SuccessResponse("실시간 인기글 조회 성공", responseData));
     }
 }
