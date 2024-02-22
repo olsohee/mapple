@@ -65,15 +65,15 @@ public class UserService {
         // refresh token 유효성 검사
         String identifier = jwtUtils.validateRefreshToken(refreshToken);
         // redis의 refresh token과 동일한지 검사
-        RefreshToken savedToken = refreshTokenRepository.findById(identifier)
+        RefreshToken savedToken = refreshTokenRepository.findById(identifier) // redis에서 identifier로 RefreshToken 객체 조회 (O(1))
                 .orElseThrow(() -> new CustomJwtException(ErrorCodeAndMessage.INVALID_TOKEN));
         if (!savedToken.getRefreshToken().equals(refreshToken)) {
             throw new CustomJwtException(ErrorCodeAndMessage.EXPIRED_TOKEN);
         }
         // 기존에 redis에 저장된 토큰 삭제 후 재발급 후 저장
         JwtDto jwtDto = jwtUtils.generateToken(identifier);
-        savedToken.setRefreshToken(jwtDto.getRefreshToken());
-        refreshTokenRepository.save(savedToken);
+        RefreshToken newRefreshToken = new RefreshToken(identifier, jwtDto.getRefreshToken());
+        refreshTokenRepository.save(newRefreshToken); // 기존 key("identifier:user@naver.com")의 값(refreshToken)이 덮어씌워진다.
         return jwtDto;
     }
 }
