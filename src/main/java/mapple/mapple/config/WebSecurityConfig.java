@@ -1,7 +1,6 @@
 package mapple.mapple.config;
 
 import lombok.RequiredArgsConstructor;
-import mapple.mapple.jwt.JwtAccessDeniedHandler;
 import mapple.mapple.jwt.JwtAuthenticationEntryPoint;
 import mapple.mapple.jwt.JwtFilter;
 import mapple.mapple.jwt.JwtUtils;
@@ -19,7 +18,6 @@ public class WebSecurityConfig {
 
     private final JwtUtils jwtUtils;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
     @Bean
@@ -32,9 +30,7 @@ public class WebSecurityConfig {
 
                 .exceptionHandling()
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)
-                .accessDeniedHandler(jwtAccessDeniedHandler)
                 .and()
-
 
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/login")
