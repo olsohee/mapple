@@ -66,7 +66,6 @@ public class Review extends BaseEntity {
         review.publicStatus = publicStatus;
         review.rating = rating;
         review.user = user;
-        review.images = new ArrayList<>();
         return review;
     }
 
@@ -79,20 +78,21 @@ public class Review extends BaseEntity {
         this.images.add(image);
     }
 
-    public void addLike(ReviewLike like) {
+    // 연관관계 편의 메소드
+    public void addReviewLike(ReviewLike like) {
         if (like.getReview() != null) {
             like.getReview().getLikes().remove(like);
         }
-        this.likes.add(like);
         like.setReview(this);
+        this.likes.add(like);
     }
 
-    public void update(String placeName, String content, Rating rating, PublicStatus publicStatus, String url) {
+    public void update(String placeName, String content, String url, PublicStatus publicStatus, Rating rating) {
         this.placeName = placeName;
         this.content = content;
-        this.rating = rating;
-        this.publicStatus = publicStatus;
         this.url = url;
+        this.publicStatus = publicStatus;
+        this.rating = rating;
     }
 
     public void updateImages(List<MultipartFile> files, String reviewImageFileDir) throws IOException {
@@ -130,22 +130,27 @@ public class Review extends BaseEntity {
         return publicStatus == PublicStatus.ONLY_FRIEND;
     }
 
-    public boolean isLikeUser(User user) {
-        return likes.stream()
+    public void likeOrUnlike(User user) {
+        boolean result = likes.stream()
                 .anyMatch(like -> like.getUser().equals(user));
+        if (!result) {
+            like(user);
+        } else {
+            unlike(user);
+        }
     }
 
-    public void unlike(User user) {
+    private void like(User user) {
+        ReviewLike reviewLike = ReviewLike.create(this, user);
+        likeCount++;
+        this.addReviewLike(reviewLike);
+    }
+
+    private void unlike(User user) {
         ReviewLike reviewLike = likes.stream()
                 .filter(like -> like.getUser().equals(user))
                 .findAny().get();
         likeCount--;
         likes.remove(reviewLike);
-    }
-
-    public void like(User user) {
-        ReviewLike reviewLike = ReviewLike.create(this, user);
-        likeCount++;
-        this.addLike(reviewLike);
     }
 }

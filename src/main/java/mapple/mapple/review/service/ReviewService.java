@@ -59,8 +59,8 @@ public class ReviewService {
 
         reviewValidator.validateReviewAuthorization(review, user);
 
-        review.update(dto.getPlaceName(), dto.getContent(), Rating.find(dto.getRating()),
-                PublicStatus.find(dto.getPublicStatus()), dto.getUrl());
+        review.update(dto.getPlaceName(), dto.getContent(), dto.getUrl(),
+                PublicStatus.find(dto.getPublicStatus()), Rating.find(dto.getRating()));
 
         if (files == null) {
             review.deleteImages();
@@ -101,11 +101,7 @@ public class ReviewService {
     public void like(long reviewId, String identifier) {
         Review review = reviewRepository.findReviewWithLock(reviewId);
         User user = findUserByIdentifier(identifier);
-        if (review.isLikeUser(user)) {
-            review.unlike(user);
-        } else {
-            review.like(user);
-        }
+        review.likeOrUnlike(user);
     }
 
     private User findUserByIdentifier(String identifier) {
